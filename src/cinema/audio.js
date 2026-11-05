@@ -1,5 +1,7 @@
-// Synthesized sound design (WebAudio) + Japanese announcer (Web Speech API).
-// Everything is generated at runtime: no recorded samples ship with the theme.
+// Synthesized sound design (WebAudio) + Japanese announcer.
+// Sound effects are generated at runtime. The announcer plays pre-rendered
+// clips (assets/voice, see scripts/gen-voice.mjs) through an intercom chain,
+// falling back to the Web Speech API when the clips cannot be loaded.
 
 export class AudioEngine {
   constructor() {
@@ -416,4 +418,136 @@ export class Announcer {
     this.synth.removeEventListener?.("voiceschanged", this.onVoices);
     this.synth.cancel();
   }
+}
+
+// Pre-rendered announcer clips played through a band-limited intercom chain.
+// Clips are fetched as soon as the cinematic mounts; decoding waits for the
+// AudioContext the start gate creates. Lines never overlap: a clip that comes
+// due while another is still speaking is queued right after it.
+export class VoicePlayer {
+  constructor(base, files) {
+    this.raw = new Map();
+    this.buffers = new Map();
+    this.pending = new Map();
+    this.busyUntil = 0;
+    this.sources = new Set();
+    this.failed = !base || typeof fetch !== "function";
+    if (this.failed) return;
+    this.fetching = Promise.all(
+      files.map(async (file) => {
+        const res = await fetch(`${base.replace(/\/$/, "")}/${file}`);
+        if (!res.ok) throw new Error(`voice ${file}: ${res.status}`);
+        this.raw.set(file, await res.arrayBuffer());
+      }),
+    ).catch(() => {
+      this.failed = true;
+    });
+  }
+
+  attach(engine) {
+    if (this.failed || !engine?.ctx || this.engine) return;
+    this.engine = engine;
+    const c = engine.ctx;
+    const hp = c.createBiquadFilter();
+    hp.type = "highpass";
+    hp.frequency.value = 240;
+    hp.Q.value = 0.8;
+    const presence = c.createBiquadFilter();
+    presence.type = "peaking";
+    presence.frequency.value = 2300;
+    presence.Q.value = 0.9;
+    presence.gain.value = 4.5;
+    const lp = c.createBiquadFilter();
+    lp.type = "lowpass";
+    lp.frequency.value = 6800;
+    lp.Q.value = 0.7;
+    const drive = c.createWaveShaper();
+    const curve = new Float32Array(1024);
+    for (let i = 0; i < curve.length; i++) {
+      const x = (i / (curve.length - 1)) * 2 - 1;
+      curve[i] = Math.tanh(x * 1.6) / Math.tanh(1.6);
+    }
+    drive.curve = curve;
+    const comp = c.createDynamicsCompressor();
+    comp.threshold.value = -22;
+    comp.ratio.value = 3.5;
+    comp.attack.value = 0.004;
+    comp.release.value = 0.18;
+    this.out = c.createGain();
+    this.out.gain.value = 1.15;
+    hp.connect(presence).connect(lp).connect(drive).connect(comp).connect(this.out).connect(engine.master);
+    this.input = hp;
+    this.ready = (this.fetching || Promise.resolve()).then(() =>
+      Promise.all(
+        [...this.raw].map(([file, data]) => {
+          const job = c
+            .decodeAudioData(data.slice(0))
+            .then((buf) => this.buffers.set(file, trim(c, buf)))
+            .catch(() => {});
+          this.pending.set(file, job);
+          return job;
+        }),
+      ),
+    );
+  }
+
+  // Resolves true when the clip was scheduled, false when it is unavailable.
+  async play(file, { delay = 0, onStart } = {}) {
+    if (this.failed || !this.engine) return false;
+    const c = this.engine.ctx;
+    const due = c.currentTime + delay;
+    if (!this.buffers.has(file)) {
+      await this.ready;
+      if (!this.buffers.has(file)) return false;
+      if (c.currentTime - due > 1.2) return true; // too late to be meaningful; drop silently
+    }
+    const buf = this.buffers.get(file);
+    const at = Math.max(c.currentTime + 0.02, due, this.busyUntil + 0.1);
+    const src = c.createBufferSource();
+    src.buffer = buf;
+    src.connect(this.input);
+    src.start(at);
+    this.sources.add(src);
+    src.onended = () => this.sources.delete(src);
+    this.busyUntil = at + buf.duration;
+    onStart?.(at, buf.duration);
+    return true;
+  }
+
+  // Cut whatever is speaking (with a short fade so it does not click).
+  stop() {
+    const c = this.engine?.ctx;
+    const fade = 0.05;
+    if (c && this.out && this.sources.size) {
+      const t = c.currentTime;
+      this.out.gain.cancelScheduledValues(t);
+      this.out.gain.setTargetAtTime(0, t, fade / 4);
+      this.out.gain.setValueAtTime(1.15, t + fade + 0.02);
+    }
+    for (const src of this.sources) {
+      try {
+        src.stop(c ? c.currentTime + fade : 0);
+      } catch {}
+    }
+    this.sources.clear();
+    this.busyUntil = c ? c.currentTime + fade : 0;
+  }
+}
+
+// Drop the leading/trailing silence TTS engines pad clips with (keeps 30 ms).
+function trim(ctx, buf) {
+  const ch = buf.getChannelData(0);
+  const thr = 0.012;
+  let a = 0;
+  let b = ch.length - 1;
+  while (a < b && Math.abs(ch[a]) < thr) a++;
+  while (b > a && Math.abs(ch[b]) < thr) b--;
+  const pad = Math.round(buf.sampleRate * 0.03);
+  a = Math.max(0, a - pad);
+  b = Math.min(ch.length - 1, b + pad * 3);
+  const len = b - a + 1;
+  if (len <= 0 || len === ch.length) return buf;
+  const out = ctx.createBuffer(buf.numberOfChannels, len, buf.sampleRate);
+  for (let i = 0; i < buf.numberOfChannels; i++) out.copyToChannel(buf.getChannelData(i).subarray(a, b + 1), i);
+  return out;
 }

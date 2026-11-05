@@ -1,3 +1,4 @@
+import { FONT_BASE } from "./theme.js";
 // Frame-wide overlay that owns the boot cinematic. The heavy three.js scene
 // lives in the lazily loaded chunk lib/client.cinema.js.
 /* global __dshRequire */
@@ -51,6 +52,7 @@ function Cinematic({ t, voice, onDone }) {
         instance = mod.mount(host.current, {
           unit: DEFAULT_UNIT,
           voice,
+          voiceBase: `${FONT_BASE}/voice`,
           strings: {
             gateHint: t("cinema.gateHint"),
             skip: t("cinema.skip"),

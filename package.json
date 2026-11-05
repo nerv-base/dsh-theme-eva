@@ -27,6 +27,8 @@
     "assets/icon.svg",
     "assets/fonts/*.woff2",
     "assets/fonts/*.txt",
+    "assets/voice/*.mp3",
+    "assets/voice/VOICE-NOTES.json",
     "locale/*.json",
     "cordis.patch.yml",
     "LICENSE",
@@ -53,7 +55,8 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs",
-    "fonts": "python3 scripts/subset-fonts.py"
+    "fonts": "python3 scripts/subset-fonts.py",
+    "voice": "node scripts/gen-voice.mjs"
   },
   "dependencies": {
     "@deepseek-ai/schemastery": "~3.18.5"

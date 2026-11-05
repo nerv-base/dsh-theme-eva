@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+@font-face { font-family: "EVA Mincho"; src: url(/assets/fonts/eva-mincho.woff2) format("woff2"); font-weight: 900; }
+@font-face { font-family: "EVA Condensed"; src: url(/assets/fonts/eva-condensed-medium.woff2) format("woff2"); font-weight: 500; }
+@font-face { font-family: "EVA Condensed"; src: url(/assets/fonts/eva-condensed-semibold.woff2) format("woff2"); font-weight: 600 800; }
+html, body { margin: 0; height: 100%; background: #111; }
+#host { position: fixed; inset: 0; }
+</style>
+</head>
+<body>
+<div id="host"></div>
+<script>
+window.__evaDone = false;
+window.__ModuleLoader__ = {
+  load({ factory }) {
+    const mod = factory((id) => { throw new Error("no module " + id); });
+    window.__evaInstance = mod.mount(document.getElementById("host"), {
+      unit: window.__evaUnit,
+      voice: true,
+      voiceBase: "/assets/voice",
+      strings: { gateHint: "点击或按任意键接入", skip: "跳过", skipHint: "Esc 跳过", confirm: "确认搭乘" },
+      onDone() { window.__evaDone = true; },
+    });
+  },
+};
+</script>
+<script type="module">
+import { DEFAULT_UNIT } from "/src/shared/units.js";
+window.__evaUnit = DEFAULT_UNIT;
+await document.fonts.load('900 40px "EVA Mincho"');
+const s = document.createElement("script");
+s.src = "/lib/client.cinema.js";
+document.body.appendChild(s);
+</script>
+</body>
+</html>

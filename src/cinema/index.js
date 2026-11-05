@@ -1,11 +1,12 @@
 // Boot cinematic chunk: start gate → entry-plug insertion → LCL → neural link →
 // sync climb to 99.2% → pilot confirmation → 100% → title card → workbench.
 import hudCss from "./hud.css";
-import { AudioEngine, Announcer } from "./audio.js";
+import { AudioEngine, Announcer, VoicePlayer } from "./audio.js";
+import { voiceFile, voiceLines } from "../shared/units.js";
 import { createScene, T } from "./scene.js";
 
 const FINAL_AT = T.syncStop; // timeline resumes here after confirmation
-const TITLE_AT = FINAL_AT + 1.6;
+const TITLE_AT = FINAL_AT + 2.2;
 const TITLE_DUR = 2.9;
 const END_AT = TITLE_AT + TITLE_DUR;
 
@@ -39,7 +40,7 @@ function syncAt(t, confirmedAt) {
   return 99.2 + 0.8 * clamp((t - FINAL_AT) / 0.9);
 }
 
-export function mount(container, { unit, voice = true, strings = {}, onDone }) {
+export function mount(container, { unit, voice = true, voiceBase, strings = {}, onDone }) {
   const style = document.createElement("style");
   style.dataset.evaCinema = "";
   style.textContent = hudCss;
@@ -165,6 +166,7 @@ export function mount(container, { unit, voice = true, strings = {}, onDone }) {
 
   let audio;
   let announcer;
+  const voices = voice ? new VoicePlayer(voiceBase, voiceLines(unit).map((l) => voiceFile(unit, l))) : undefined;
   let started = false;
   let startWall = 0;
   let confirmedAt = null; // wall-clock ms when the pilot confirmed
@@ -174,10 +176,25 @@ export function mount(container, { unit, voice = true, strings = {}, onDone }) {
   let lastSub = -1;
   const fired = new Set();
 
-  const say = (text, opts) => {
-    if (!announcer || !text) return;
-    audio?.squelch(audio.now);
-    setTimeout(() => announcer?.speak(text, opts), 120);
+  // Speak one script line: pre-rendered clip through the intercom chain, or
+  // the system voice when clips are unavailable. Squelch clicks frame it.
+  const say = (line, delay = 0) => {
+    if (!voice || !line || typeof line.voice !== "string" || finished) return;
+    const fallback = () => {
+      if (!announcer || finished) return;
+      audio?.squelch(audio.now);
+      setTimeout(() => announcer?.speak(line.voice, { rate: 1, pitch: 1 }), 120 + delay * 1000);
+    };
+    if (!voices || voices.failed) return fallback();
+    voices
+      .play(voiceFile(unit, line), {
+        delay: delay + 0.1,
+        onStart: (at, dur) => {
+          audio?.squelch(Math.max(audio.now, at - 0.1));
+          audio?.squelch(at + dur + 0.04);
+        },
+      })
+      .then((ok) => { if (!ok) fallback(); });
   };
 
   // Cue sheet: [time, id, fn]. Fired once when the timeline passes them.
@@ -195,17 +212,17 @@ export function mount(container, { unit, voice = true, strings = {}, onDone }) {
     [T.syncStop, "confirm", () => {
       audio?.beep(audio.now, 1568, 0.14, 0.07);
       audio?.beep(audio.now + 0.2, 1568, 0.14, 0.07);
-      if (voice) say(unit.confirm.voice);
+      say(unit.confirm);
     }],
   ];
   unit.script.forEach((line, i) => {
-    cues.push([line.t, `line${i}`, () => { if (line.voice && voice) say(line.ja); }]);
+    cues.push([line.t, `line${i}`, () => say(line)]);
     const next = unit.script[i + 1]?.t ?? T.syncStop;
     cues.push([Math.min(next - 0.3, line.t + 2.2), `ok${i}`, () => audio?.chirp(audio.now)]);
   });
   const postCues = [
-    [FINAL_AT + 0.02, "final", () => { audio?.chirp(audio.now); if (voice) say(unit.final.voice); }],
-    [TITLE_AT, "title", () => { audio?.boom(audio.now); audio?.humFade(audio.now + 2, 1.2); if (voice) setTimeout(() => announcer?.speak(unit.title.voice, { rate: 0.95, pitch: 0.78 }), 450); }],
+    [FINAL_AT + 0.02, "final", () => { audio?.chirp(audio.now); say(unit.final); }],
+    [TITLE_AT, "title", () => { audio?.boom(audio.now); audio?.humFade(audio.now + 2, 1.2); say(unit.title, 0.45); }],
   ];
 
   function timeline(now) {
@@ -358,6 +375,7 @@ export function mount(container, { unit, voice = true, strings = {}, onDone }) {
     audio = new AudioEngine();
     audio.resume();
     announcer = new Announcer(voice);
+    voices?.attach(audio);
     startWall = performance.now();
     gate.classList.add("is-gone");
   }
@@ -366,6 +384,7 @@ export function mount(container, { unit, voice = true, strings = {}, onDone }) {
     if (confirmedAt != null || !started) return;
     if (timeline(performance.now()) < T.syncStop) return;
     confirmedAt = performance.now();
+    voices?.stop(); // the pilot answered: cut the boarding prompt
   }
 
   function finish() {
@@ -373,6 +392,7 @@ export function mount(container, { unit, voice = true, strings = {}, onDone }) {
     finished = true;
     root.classList.add("is-leaving");
     announcer?.dispose();
+    voices?.stop();
     audio?.humFade(audio.now, 0.5);
     setTimeout(() => onDone?.(), 600);
   }
@@ -410,6 +430,7 @@ export function mount(container, { unit, voice = true, strings = {}, onDone }) {
       window.removeEventListener("keydown", onKey, true);
       ro.disconnect();
       announcer?.dispose();
+      voices?.stop();
       audio?.close();
       scene?.dispose();
       root.remove();

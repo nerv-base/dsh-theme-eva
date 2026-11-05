@@ -1,0 +1,60 @@
+{
+  "engine": "Microsoft online speech via edge-tts (generation only)",
+  "settings": {
+    "rate": "-6%",
+    "pitch": "-4Hz"
+  },
+  "runtimeProcessing": "band-limited intercom EQ and light compression in WebAudio",
+  "lines": [
+    {
+      "file": "02-insert.mp3",
+      "text": "エントリープラグ、挿入。",
+      "voice": "ja-JP-NanamiNeural"
+    },
+    {
+      "file": "02-lock.mp3",
+      "text": "プラグ固定、第一次接続、開始。",
+      "voice": "ja-JP-NanamiNeural"
+    },
+    {
+      "file": "02-lcl.mp3",
+      "text": "エルシーエル、注水。",
+      "voice": "ja-JP-NanamiNeural"
+    },
+    {
+      "file": "02-electric.mp3",
+      "text": "エルシーエル、電化。",
+      "voice": "ja-JP-NanamiNeural"
+    },
+    {
+      "file": "02-power.mp3",
+      "text": "主電源、接続。",
+      "voice": "ja-JP-NanamiNeural"
+    },
+    {
+      "file": "02-a10.mp3",
+      "text": "エーテン神経接続、異常なし。",
+      "voice": "ja-JP-NanamiNeural"
+    },
+    {
+      "file": "02-sync.mp3",
+      "text": "シンクロ、開始。",
+      "voice": "ja-JP-NanamiNeural"
+    },
+    {
+      "file": "02-confirm.mp3",
+      "text": "セカンドチルドレン、搭乗を確認してください。",
+      "voice": "ja-JP-NanamiNeural"
+    },
+    {
+      "file": "02-final.mp3",
+      "text": "シンクロ率、百パーセント。",
+      "voice": "ja-JP-NanamiNeural"
+    },
+    {
+      "file": "02-title.mp3",
+      "text": "エヴァンゲリオン二号機、起動。",
+      "voice": "ja-JP-NanamiNeural"
+    }
+  ]
+}

@@ -34,20 +34,31 @@ export const UNITS = {
     },
     // Cinematic script: t = seconds from the moment the pilot passes the start gate.
     script: [
-      { t: 0.6, ja: "エントリープラグ、挿入", en: "ENTRY PLUG INSERTION", voice: true },
-      { t: 4.4, ja: "プラグ固定、第一次接続開始", en: "PLUG LOCKED — PRIMARY CONTACT", voice: true },
-      { t: 8.4, ja: "LCL 注水", en: "LCL INJECTION", voice: true },
-      { t: 11.6, ja: "LCL 電化", en: "ELECTRIFYING LCL", voice: true },
-      { t: 14.4, ja: "主電源接続、全回路動力伝達", en: "MAIN POWER CONNECTED — ALL CIRCUITS LIVE", voice: true },
-      { t: 17.4, ja: "A10 神経接続、異常なし", en: "A10 NERVE CONNECTION — NOMINAL", voice: true },
-      { t: 20.4, ja: "シンクロ開始", en: "SYNCHRONIZATION START", voice: true },
+      { id: "insert", t: 0.6, ja: "エントリープラグ、挿入", en: "ENTRY PLUG INSERTION", voice: "エントリープラグ、挿入。" },
+      { id: "lock", t: 4.4, ja: "プラグ固定、第一次接続開始", en: "PLUG LOCKED — PRIMARY CONTACT", voice: "プラグ固定、第一次接続、開始。" },
+      { id: "lcl", t: 8.4, ja: "LCL 注水", en: "LCL INJECTION", voice: "エルシーエル、注水。" },
+      { id: "electric", t: 11.6, ja: "LCL 電化", en: "ELECTRIFYING LCL", voice: "エルシーエル、電化。" },
+      { id: "power", t: 14.4, ja: "主電源接続、全回路動力伝達", en: "MAIN POWER CONNECTED — ALL CIRCUITS LIVE", voice: "主電源、接続。" },
+      { id: "a10", t: 17.4, ja: "A10 神経接続、異常なし", en: "A10 NERVE CONNECTION — NOMINAL", voice: "エーテン神経接続、異常なし。" },
+      { id: "sync", t: 20.4, ja: "シンクロ開始", en: "SYNCHRONIZATION START", voice: "シンクロ、開始。" },
     ],
-    confirm: { ja: "セカンドチルドレン、搭乗確認", en: "SECOND CHILDREN — CONFIRM BOARDING", voice: "セカンドチルドレン、搭乗を確認してください" },
-    final: { ja: "シンクロ率 100%、ハーモニクス正常", en: "SYNC RATIO 100% — HARMONICS NORMAL", voice: "シンクロ率、百パーセント。ハーモニクス、すべて正常" },
-    title: { ja: "弐号機 起動", en: "EVANGELION UNIT-02 · ACTIVATED", voice: "エヴァンゲリオン弐号機、起動" },
+    confirm: { id: "confirm", ja: "セカンドチルドレン、搭乗確認", en: "SECOND CHILDREN — CONFIRM BOARDING", voice: "セカンドチルドレン、搭乗を確認してください。" },
+    final: { id: "final", ja: "シンクロ率 100%、ハーモニクス正常", en: "SYNC RATIO 100% — HARMONICS NORMAL", voice: "シンクロ率、百パーセント。" },
+    title: { id: "title", ja: "弐号機 起動", en: "EVANGELION UNIT-02 · ACTIVATED", voice: "エヴァンゲリオン二号機、起動。" },
     gate: { ja: "接続待機", en: "ENTRY PLUG — STANDBY" },
     syncStop: 99.2,
+    // Pre-rendered announcer clips: assets/voice/<unit id>-<line id>.mp3 (see scripts/gen-voice.mjs).
+    voiceName: "ja-JP-NanamiNeural",
   },
 };
 
 export const DEFAULT_UNIT = UNITS["02"];
+
+// Every line the announcer speaks, in a stable order.
+export function voiceLines(unit) {
+  return [...unit.script, unit.confirm, unit.final, unit.title].filter((l) => typeof l.voice === "string");
+}
+
+export function voiceFile(unit, line) {
+  return `${unit.id}-${line.id}.mp3`;
+}

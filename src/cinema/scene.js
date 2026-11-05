@@ -198,13 +198,13 @@ void main() {
   vec2 cell = floor(p);
   vec2 f = fract(p);
   float seam = smoothstep(0.0, 0.04, f.x) * smoothstep(1.0, 0.96, f.x) * smoothstep(0.0, 0.05, f.y) * smoothstep(1.0, 0.95, f.y);
-  float tone = 0.06 + 0.035 * hash(cell);
+  float tone = 0.11 + 0.06 * hash(cell);
   vec3 base = vec3(tone * 1.1, tone * 0.95, tone * 0.9) * mix(0.45, 1.0, seam);
   // Indicator lamps along the panel rows.
   float lamp = step(0.82, hash(cell + 3.1)) * smoothstep(0.12, 0.0, length(f - vec2(0.82, 0.2)));
   float blink = step(0.5, fract(uTime * (0.6 + hash(cell) * 2.0) + hash(cell + 9.0)));
   vec3 lampCol = mix(uAccent, vec3(0.35, 1.0, 0.45), step(0.6, hash(cell + 1.7)));
-  vec3 col = base * (0.25 + 0.75 * uLights) + lamp * blink * lampCol * 1.6 * uLights;
+  vec3 col = base * (0.2 + 1.0 * uLights) + lamp * blink * lampCol * 1.6 * uLights;
   // Light strip around the hatch ring.
   col += uAccent * smoothstep(0.012, 0.0, abs(vUv.y - 0.5)) * 0.6 * uLights;
 
@@ -416,22 +416,31 @@ export function createScene(canvas, unit) {
   const seatMat = new MeshStandardMaterial({ color: 0x2b2524, metalness: 0.4, roughness: 0.6 });
   const seat = new Group();
   const seatBack = new Mesh(new BoxGeometry(0.8, 1.1, 0.12), seatMat);
-  seatBack.position.set(0, -0.35, -0.7);
-  seatBack.rotation.x = -0.3;
+  seatBack.position.set(0, -0.1, 1.05);
+  seatBack.rotation.x = 0.3;
   seat.add(seatBack);
   const seatBase = new Mesh(new BoxGeometry(0.8, 0.12, 0.7), seatMat);
-  seatBase.position.set(0, -0.95, -0.35);
+  seatBase.position.set(0, -0.85, 0.55);
   seat.add(seatBase);
   const gripMat = new MeshStandardMaterial({ color: 0x8a1c22, metalness: 0.5, roughness: 0.4, emissive: 0x200404 });
   for (const x of [-0.62, 0.62]) {
     const arm = new Mesh(new BoxGeometry(0.12, 0.1, 0.8), seatMat);
-    arm.position.set(x, -0.62, 0.05);
+    arm.position.set(x * 0.9, -0.62, -0.05);
     seat.add(arm);
     const grip = new Mesh(new CylinderGeometry(0.06, 0.07, 0.32, 16), gripMat);
-    grip.position.set(x, -0.44, 0.38);
-    grip.rotation.x = 0.35;
+    grip.position.set(x * 0.72, -0.46, -0.36);
+    grip.rotation.x = -0.5;
     seat.add(grip);
   }
+  // Low console arc in front of the pilot with a lit edge.
+  const consoleMesh = new Mesh(new CylinderGeometry(1.05, 1.15, 0.22, 48, 1, false, Math.PI * 0.72, Math.PI * 0.56), seatMat);
+  consoleMesh.position.set(0, -0.92, 0.25);
+  seat.add(consoleMesh);
+  const edgeMat = new MeshBasicMaterial({ color: accent, transparent: true, opacity: 0.0, blending: AdditiveBlending });
+  const edge = new Mesh(new TorusGeometry(1.06, 0.008, 6, 64, Math.PI * 0.56), edgeMat);
+  edge.rotation.set(Math.PI / 2, 0, Math.PI * 0.22);
+  edge.position.set(0, -0.8, 0.25);
+  seat.add(edge);
   cab.add(seat);
 
   const surfaceUniforms = { uTime: { value: 0 }, uAlpha: { value: 0 } };
@@ -570,12 +579,16 @@ export function createScene(canvas, unit) {
     cabinUniforms.uRainbow.value = smooth(T.rainbowStart, T.rainbowStart + 1.2, t) * (1 - smooth(T.rainbowEnd - 0.8, T.rainbowEnd, t));
     cabinUniforms.uView.value = smooth(T.rainbowEnd - 0.6, T.rainbowEnd + 0.8, t);
     cabLight.intensity = 4 * cabinUniforms.uLights.value + 6 * electric;
+    edgeMat.opacity = 0.75 * cabinUniforms.uLights.value + 0.25 * cabinUniforms.uRainbow.value;
     // Pilot-eye camera: slow breathing drift, look up as the liquid rises.
     const sh = shakeAt(t);
     const head = level > 0.05 ? 1 : 0;
     cabCam.position.set(Math.sin(t * 0.4) * 0.05 + (Math.random() - 0.5) * sh * 0.4, 0.05 + Math.sin(t * 0.9) * 0.02, 0.35);
-    const up = smooth(T.lclStart, T.lclStart + 2.4, t) * (1 - smooth(T.lclEnd - 1, T.lclEnd + 1, t));
-    cabCam.lookAt(new Vector3(Math.sin(t * 0.25) * 0.2, lerp(-0.25, 0.9, up), -1.6));
+    // Look down at the feet as LCL floods in, follow the surface up past the eyes.
+    const down = smooth(T.lclStart - 0.4, T.lclStart + 0.8, t);
+    const follow = smooth(T.lclStart + 1.4, T.lclEnd - 0.6, t);
+    const lookY = lerp(lerp(-0.2, -1.1, down), 0.15, follow);
+    cabCam.lookAt(new Vector3(Math.sin(t * 0.25) * 0.2, lookY, -1.6));
     postUniforms.uSubmerged.value = head * smooth(0.0, 0.4, level) ;
     postUniforms.uElectric.value = electric;
     renderer.setRenderTarget(target);
