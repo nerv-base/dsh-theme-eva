@@ -61,16 +61,16 @@ export function themeTokens(unit = DEFAULT_UNIT) {
     "--dsw-alias-label-tertiary": p.muted,
     "--dsw-alias-label-caption": p.faint,
     "--dsw-alias-label-primary-foreground": "#fff4ee",
-    "--dsw-alias-link": p.green,
+    "--dsw-alias-link": "#ff8a3d",
     "--dsw-alias-state-error-primary": p.redHot,
     "--dsw-alias-state-error-secondary": p.redHot,
     "--dsw-alias-state-idle-primary": p.faint,
-    "--dsw-alias-state-success-primary": p.green,
-    "--dsw-alias-state-success-secondary": p.greenHot,
+    "--dsw-alias-state-success-primary": "#5fb97c",
+    "--dsw-alias-state-success-secondary": "#7fcf98",
     "--dsw-alias-state-warn-primary": p.warn,
     "--dsw-alias-state-warn-secondary": "#f5c96a",
     "--dsw-alias-state-business-primary": p.orange,
-    "--dsw-alias-state-business-tertiary": alpha(p.green, 14),
+    "--dsw-alias-state-business-tertiary": alpha(p.orange, 14),
     "--dsw-alias-interactive-bg-hover": "#ff8a8a12",
     "--dsw-alias-interactive-bg-active": "#ff8a8a21",
     "--dsw-alias-interactive-bg-hover-solid": "#251c1e",
@@ -81,7 +81,7 @@ export function themeTokens(unit = DEFAULT_UNIT) {
     "--dsw-alias-scrollbar-hover-l2": alpha(p.accent, 55),
     "--dsw-alias-switch-thumb": p.muted,
     "--dsw-alias-toast-bg": "#2a1c1f",
-    "--dsw-focus-ring-color": p.green,
+    "--dsw-focus-ring-color": p.orange,
     "--dsw-specific-sidebar-fill": p.sidebar,
     "--dsw-specific-sidebar-nav-item-active": p.redDeep,
     "--dsw-specific-sidebar-nav-item-hover": "#24141a",
@@ -151,7 +151,7 @@ ${B} [class*="_sidebarCol"]{
     repeating-linear-gradient(0deg, #ffffff05 0 1px, transparent 1px 3px),
     var(--dsw-specific-sidebar-fill) !important;
   border-right:1px solid #3a1418 !important;
-  box-shadow:inset -1px 0 0 #3fe08a14;
+  box-shadow:inset -1px 0 0 #f06a2214;
 }
 ${B} ${tok("newSession")}:not([class*="_collapsed"] *){
   background:linear-gradient(90deg,#d8262e2e,#d8262e12) !important;
@@ -190,7 +190,7 @@ ${B} [data-phase]:has(> [data-slot="conversation.header"])::before{
     ${svgUrl(backdropRight)} right -24px top 52px / auto calc(100% - 72px) no-repeat,
     ${svgUrl(backdropLeft)} left 18px bottom 96px / 210px auto no-repeat,
     radial-gradient(120% 70% at 100% 0, #d8262e0d, transparent 60%),
-    radial-gradient(80% 50% at 0 100%, #3fe08a08, transparent 60%);
+    radial-gradient(80% 50% at 0 100%, #f06a2208, transparent 60%);
 }
 ${B} [data-phase]:has(> [data-slot="conversation.header"]) > [data-slot="conversation.header"] > *{position:relative;z-index:1}
 ${B} [data-phase]:has(> [data-slot="conversation.header"]) > [data-slot="conversation.header"] > *::after{
@@ -219,8 +219,8 @@ ${md} h3::before{content:"";position:absolute;left:0;top:50%;width:7px;height:7p
 ${md} h4{color:var(--eva-orange)}
 ${md} li::marker{color:var(--eva-orange)}
 ${md} strong{color:#fff2ea}
-${md} a{color:${G} !important}
-${md} blockquote{border-left:2px solid ${G} !important;background:linear-gradient(90deg,#3fe08a12,transparent 70%);padding:6px 0 6px 14px !important}
+${md} a{color:#ff8a3d !important;text-decoration-color:#f06a2266 !important}
+${md} blockquote{border-left:2px solid var(--eva-orange) !important;background:linear-gradient(90deg,#f06a2210,transparent 70%);padding:6px 0 6px 14px !important}
 ${md} hr{background:linear-gradient(90deg,#d8262e,#d8262e33 40%,#f06a2233 60%,#f06a22) !important;height:1px !important;opacity:.6}
 ${md} :not(pre)>code{color:#ffa063 !important;border:.5px solid #f06a2233}
 ${md} [class*="_tableScroll_"] th{color:var(--eva-orange);letter-spacing:.06em;border-bottom:1px solid #d8262e88 !important}
@@ -237,11 +237,11 @@ ${B} [data-composer-card]{
   border-radius:0 !important;
 }
 ${B} [data-composer-card]:focus-within{
-  box-shadow:inset 0 2px 0 0 #f0413c, 0 0 0 .5px #3fe08a77, 0 0 22px -6px #3fe08a44 !important}
+  box-shadow:inset 0 2px 0 0 #f0413c, 0 0 0 .5px #f06a2277, 0 0 22px -6px #f06a2244 !important}
 
 /* ── system details ── */
 ${B} ::selection{background:#d8262e66;color:#fff}
-${B} :focus-visible{outline-color:${G}}
+${B} :focus-visible{outline-color:var(--eva-orange)}
 ${B} ::-webkit-scrollbar-thumb{background-color:#d8262e4d}
 ${B} ::-webkit-scrollbar-thumb:hover{background-color:#d8262e88}
 `;

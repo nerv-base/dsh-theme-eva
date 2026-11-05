@@ -11,9 +11,9 @@ export const UNITS = {
     nameEn: "EVANGELION UNIT-02",
     designation: "PRODUCTION MODEL",
     pilotRole: "SECOND CHILDREN",
-    // Unit-02: crimson armour + the four green eyes / NERV phosphor green.
-    // Red carries identity (brand, primary actions, selection); green carries
-    // the "system alive" signal (links, focus, success, sync, running power).
+    // Unit-02: crimson armour (identity, primary actions) + orange HUD
+    // markings (active state, links, sync, running power). Green is kept for
+    // semantic success and the PHASE bars in the backdrop only.
     palette: {
       bg: "#0b090a",
       panel: "#131012",
