@@ -6,6 +6,14 @@
   "main": "lib/index.js",
   "icon": "assets/icon.svg",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nerv-base/dsh-theme-eva.git"
+  },
+  "homepage": "https://github.com/nerv-base/dsh-theme-eva#readme",
+  "bugs": {
+    "url": "https://github.com/nerv-base/dsh-theme-eva/issues"
+  },
   "keywords": [
     "dsh",
     "deepseek-harness",
@@ -32,6 +40,7 @@
     "locale/*.json",
     "cordis.patch.yml",
     "LICENSE",
+    "LICENSE-three.txt",
     "NOTICE.md",
     "README.md"
   ],

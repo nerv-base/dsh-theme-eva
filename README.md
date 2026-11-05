@@ -17,7 +17,7 @@ If the system setting **Reduce motion** is on, the 3D cinematic is replaced by a
 ## Install
 
 ```sh
-git clone <this repo> dsh-theme-eva
+git clone https://github.com/nerv-base/dsh-theme-eva.git
 cd dsh-theme-eva
 npm install
 npm run build

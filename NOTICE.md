@@ -7,7 +7,7 @@ their own licenses.
 | --- | --- | --- |
 | `assets/fonts/eva-mincho.woff2` | Subset of **Noto Serif CJK JP Black** (Adobe / Google) | SIL Open Font License 1.1 — `assets/fonts/OFL-NotoSerifCJK.txt` |
 | `assets/fonts/eva-condensed-medium.woff2`, `assets/fonts/eva-condensed-semibold.woff2` | Subsets of **Barlow Condensed** (Jeremy Tribby) | SIL Open Font License 1.1 — `assets/fonts/OFL-BarlowCondensed.txt` |
-| `lib/client.cinema.js` | Contains a tree-shaken build of **three.js** | MIT — Copyright © 2010-2024 three.js authors |
+| `lib/client.cinema.js` | Contains a tree-shaken build of **three.js** | MIT — Copyright © 2010-2024 three.js authors; full license in `LICENSE-three.txt` |
 | `assets/voice/*.mp3` | Japanese announcer lines rendered with Microsoft **ja-JP-NanamiNeural** through `edge-tts` (`scripts/gen-voice.mjs`, settings in `assets/voice/VOICE-NOTES.json`) | **Not covered by the MIT license.** See below. |
 
 The subset fonts are renamed ("EVA Mincho", "EVA Condensed") only as CSS
