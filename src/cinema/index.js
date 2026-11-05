@@ -4,7 +4,7 @@ import hudCss from "./hud.css";
 import { AudioEngine, Announcer, VoicePlayer } from "./audio.js";
 import { voiceFile, voiceLines } from "../shared/units.js";
 import { createScene, T } from "./scene.js";
-import { createMonitor, CUTS, cutAt } from "./monitor.js";
+import { createMonitor, CUTS, SCOPES, cutAt } from "./monitor.js";
 
 const FINAL_AT = T.syncStop; // timeline resumes here after confirmation
 const TITLE_AT = FINAL_AT + 2.2;
@@ -178,6 +178,7 @@ export function mount(container, { unit, voice = true, voiceClips, strings = {},
   let startWall = 0;
   let confirmedAt = null; // wall-clock ms when the pilot confirmed
   let frozenWall = 0;
+  let holdAt = null; // debug seek hold
   let raf = 0;
   let finished = false;
   let lastSub = -1;
@@ -228,8 +229,12 @@ export function mount(container, { unit, voice = true, voiceClips, strings = {},
       if (cut.kind === "title") audio?.beep(audio.now, 196, 0.22, 0.09);
       else { audio?.beep(audio.now, 2093, 0.03, 0.05); audio?.whoosh(audio.now, 0.18, 3200, 900, 0.12); }
       if (cut.kind === "neural") for (let k = 0; k < 14; k++) audio?.beep(audio.now + 0.08 + k * 0.075, 1320 + (k % 3) * 110, 0.025, 0.035);
+      if (cut.kind === "lines") for (let k = 0; k < 18; k++) audio?.beep(audio.now + 0.1 + k * 0.06, 990 + (k % 4) * 165, 0.02, 0.03);
       if (cut.kind === "magi") [0.12, 0.26, 0.4].forEach((d) => audio?.beep(audio.now + d * 0.75 + 0.1, 1760, 0.06, 0.05));
     }]);
+  });
+  SCOPES.forEach((scope, i) => {
+    cues.push([scope.at, `scope${i}`, () => { audio?.beep(audio.now, 2637, 0.03, 0.05); audio?.whoosh(audio.now, 0.2, 3600, 1200, 0.12); }]);
   });
   unit.script.forEach((line, i) => {
     cues.push([line.t, `line${i}`, () => say(line)]);
@@ -243,6 +248,7 @@ export function mount(container, { unit, voice = true, voiceClips, strings = {},
 
   function timeline(now) {
     if (!started) return 0;
+    if (holdAt != null) return holdAt;
     const raw = (now - startWall) / 1000;
     if (confirmedAt == null) return Math.min(raw, T.syncStop);
     return FINAL_AT + (now - confirmedAt) / 1000;
@@ -314,14 +320,18 @@ export function mount(container, { unit, voice = true, voiceClips, strings = {},
 
     // Scene
     const titleOn = confirmedAt != null && t >= TITLE_AT;
+    const s = syncAt(t, confirmedAt);
+    const clock = now / 1000;
     if (scene && !titleOn) {
       const fade = confirmedAt != null ? 1 - clamp((t - (TITLE_AT - 0.4)) / 0.4) : 1;
       const flash = confirmedAt != null ? Math.exp(-(t - FINAL_AT) * 5) * 0.5 : 0;
-      scene.update(t, { fade, flash });
+      scene.update(t, { fade, flash, clock, sync: s });
     }
 
-    const onMonitor = confirmedAt == null && monitor.update(t);
+    const mon = monitor.update(t, { sync: s, clock, confirmed: confirmedAt != null, hidden: titleOn || (confirmedAt != null && t >= TITLE_AT - 0.4) });
+    const onMonitor = mon === "cut";
     root.classList.toggle("is-monitor", onMonitor);
+    root.classList.toggle("is-scope", mon === "scope");
     root.classList.toggle("is-intertitle", onMonitor && cutAt(t)?.kind === "title");
 
     // HUD
@@ -369,7 +379,6 @@ export function mount(container, { unit, voice = true, voiceClips, strings = {},
     const a10 = clamp((t - (T.power + 4.3)) / 1.2);
     setRead("a10", t < T.power + 4.3 ? "OFFLINE" : a10 < 1 ? `LINKING ${Math.round(a10 * 100)}%` : "NOMINAL", a10);
 
-    const s = syncAt(t, confirmedAt);
     sync.classList.toggle("is-on", t >= T.syncStart - 0.2);
     syncEl.textContent = s.toFixed(1);
     harmEl.textContent = `HARMONICS ±${((100 - s) * 0.12).toFixed(1)}`;
@@ -445,6 +454,14 @@ export function mount(container, { unit, voice = true, voiceClips, strings = {},
   raf = requestAnimationFrame(frame);
 
   return {
+    /** Jump the timeline (harness/debug use): starts if needed, holds the confirmation gate. */
+    seek(sec, { hold = false } = {}) {
+      start();
+      if (confirmedAt != null) return;
+      startWall = performance.now() - sec * 1000;
+      holdAt = hold ? sec : null;
+      for (const [at, id] of cues) if (at < sec - 0.05) fired.add(id);
+    },
     dispose() {
       cancelAnimationFrame(raf);
       window.removeEventListener("keydown", onKey, true);
