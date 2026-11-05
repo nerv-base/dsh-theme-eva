@@ -5,7 +5,7 @@
 /* ── brand ── */
 .eva-brand-name{display:inline-flex;align-items:baseline;gap:8px;min-width:0;white-space:nowrap;color:var(--dsw-alias-label-primary)}
 .eva-brand-kanji{font-family:var(--eva-font-mincho,"EVA Mincho",serif);font-weight:900;font-size:18px;line-height:1;letter-spacing:.02em;transform:scaleY(.86);transform-origin:50% 70%;display:inline-block}
-.eva-brand-sub{font-family:var(--eva-font-condensed,"EVA Condensed",sans-serif);font-weight:600;font-size:11px;letter-spacing:.14em;color:var(--eva-green,#3fe08a)}
+.eva-brand-sub{font-family:var(--eva-font-condensed,"EVA Condensed",sans-serif);font-weight:600;font-size:11px;letter-spacing:.14em;color:var(--eva-orange,#f06a22)}
 
 .eva-hero{display:flex;flex-direction:column;align-items:center;gap:6px;user-select:none;color:var(--eva-text,#ece4da);margin-bottom:6px}
 .eva-hero-title{display:flex;align-items:flex-end;gap:10px;line-height:.82}
@@ -13,7 +13,7 @@
 .eva-hero-num{font-family:"EVA Condensed",var(--eva-font-condensed),sans-serif;font-weight:700;font-size:44px;color:var(--eva-green,#3fe08a);line-height:.8;text-shadow:0 0 18px #3fe08a55}
 .eva-hero-rule{display:flex;align-items:center;gap:10px;width:min(340px,80vw);font-family:"EVA Condensed",var(--eva-font-condensed),sans-serif;font-weight:600;font-size:11px;letter-spacing:.22em;color:var(--dsw-alias-label-tertiary,#a59a93)}
 .eva-hero-rule i{flex:1;height:1px;background:linear-gradient(90deg,#d8262e,#d8262e 40%,#3fe08a00)}
-.eva-hero-rule-bottom i{background:linear-gradient(90deg,#3fe08a00,#3fe08a 60%,#3fe08a)}
+.eva-hero-rule-bottom i{background:linear-gradient(90deg,#f06a2200,#f06a22 60%,#f06a22)}
 
 /* ── settings row ── */
 .eva-settings{border-bottom:.5px solid var(--dsw-alias-border-l2);padding:16px 0;display:flex;flex-direction:column;gap:10px}

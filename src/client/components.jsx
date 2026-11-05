@@ -32,7 +32,7 @@ export function UnitMark({ size = 24, number = unit.id, title }) {
     >
       <path d="M6 4h36l2 2v26L28 44H6l-2-2V6z" fill="#d8262e" />
       <path d="M8 8h32v22.5L26.5 40H8z" fill="none" stroke="#3fe08a" strokeWidth="1.2" opacity=".55" />
-      <path d="M4 34h8M36 4v6" stroke="#3fe08a" strokeWidth="2" />
+      <path d="M4 34h8M36 4v6" stroke="#f06a22" strokeWidth="2" />
       <text
         x="24"
         y="29.5"

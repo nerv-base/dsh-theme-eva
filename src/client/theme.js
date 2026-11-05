@@ -69,14 +69,14 @@ export function themeTokens(unit = DEFAULT_UNIT) {
     "--dsw-alias-state-success-secondary": p.greenHot,
     "--dsw-alias-state-warn-primary": p.warn,
     "--dsw-alias-state-warn-secondary": "#f5c96a",
-    "--dsw-alias-state-business-primary": p.accentHot,
+    "--dsw-alias-state-business-primary": p.orange,
     "--dsw-alias-state-business-tertiary": alpha(p.green, 14),
     "--dsw-alias-interactive-bg-hover": "#ff8a8a12",
     "--dsw-alias-interactive-bg-active": "#ff8a8a21",
     "--dsw-alias-interactive-bg-hover-solid": "#251c1e",
     "--dsw-alias-markdown-code-block": "#0e0b0c",
     "--dsw-alias-markdown-code-block-banner": "#171214",
-    "--dsw-alias-markdown-inline-code": alpha(p.green, 11),
+    "--dsw-alias-markdown-inline-code": alpha(p.orange, 12),
     "--dsw-alias-scrollbar-bg-l2": alpha(p.accent, 30),
     "--dsw-alias-scrollbar-hover-l2": alpha(p.accent, 55),
     "--dsw-alias-switch-thumb": p.muted,
@@ -85,7 +85,7 @@ export function themeTokens(unit = DEFAULT_UNIT) {
     "--dsw-specific-sidebar-fill": p.sidebar,
     "--dsw-specific-sidebar-nav-item-active": p.redDeep,
     "--dsw-specific-sidebar-nav-item-hover": "#24141a",
-    "--dsw-specific-sidebar-nav-item-active-accent": p.accentHot,
+    "--dsw-specific-sidebar-nav-item-active-accent": p.orange,
     "--dsw-specific-input-major": "#141012",
     "--dsw-specific-menu": "#1a1315f5",
     "--dsw-specific-bubble": "#2a1216",
@@ -162,11 +162,11 @@ ${B} ${tok("newSession")}:not([class*="_collapsed"] *):hover{background:linear-g
 ${B} ${tok("sessionRow")}${tok("selected")},
 ${B} ${tok("panelRow")}${tok("panelActive")}{
   background:linear-gradient(90deg,#d8262e38,#d8262e0a 70%) !important;
-  box-shadow:inset 2px 0 0 ${RH};
+  box-shadow:inset 2px 0 0 var(--eva-orange);
 }
 ${B} ${tok("sessionRow")}:hover:not(${tok("selected")}){background:#ff6a6a10 !important}
 ${B} [class*="_sidebarCol"] [aria-current="page"],
-${B} [class*="_sidebarCol"] [data-active="true"]{box-shadow:inset 2px 0 0 ${RH}}
+${B} [class*="_sidebarCol"] [data-active="true"]{box-shadow:inset 2px 0 0 var(--eva-orange)}
 
 /* ── brand seat: the shipped brand entry outranks installed packages, so swap it in CSS ── */
 ${B} [class*="_brandMark"] > [data-slot="sidebar.brand.mark"] > *,
@@ -181,7 +181,7 @@ ${B} [class*="_brandName"]:has(> [data-slot="sidebar.brand.name"])::before{
   display:inline-block;transform:scaleX(.86);transform-origin:left center;margin-right:-6px;color:var(--eva-text,#ece4da)}
 ${B} [class*="_brandName"]:has(> [data-slot="sidebar.brand.name"])::after{
   content:"UNIT-${unit.id} · DSH";font-family:"EVA Condensed",sans-serif;font-weight:600;font-size:11px;
-  letter-spacing:.16em;color:${G};align-self:flex-end;line-height:18px;text-shadow:0 0 8px #3fe08a55}
+  letter-spacing:.16em;color:var(--eva-orange);align-self:flex-end;line-height:18px;text-shadow:0 0 8px #f06a2255}
 
 /* ── conversation backdrop + header ── */
 ${B} [data-phase]:has(> [data-slot="conversation.header"])::before{
@@ -195,9 +195,9 @@ ${B} [data-phase]:has(> [data-slot="conversation.header"])::before{
 ${B} [data-phase]:has(> [data-slot="conversation.header"]) > [data-slot="conversation.header"] > *{position:relative;z-index:1}
 ${B} [data-phase]:has(> [data-slot="conversation.header"]) > [data-slot="conversation.header"] > *::after{
   content:"";position:absolute;left:0;right:0;bottom:0;height:1px;pointer-events:none;
-  background:linear-gradient(90deg,#d8262e 0,#d8262e66 22%,transparent 48%,transparent 62%,#3fe08a55 85%,#3fe08a 100%);opacity:.55}
+  background:linear-gradient(90deg,#d8262e 0,#d8262e66 22%,transparent 48%,transparent 62%,#f06a2255 85%,#f06a22 100%);opacity:.55}
 ${B} ${tok("crumbCurrent")}{letter-spacing:.02em}
-${B} ${tok("tabActive")}{color:${RH} !important;text-shadow:0 0 10px #f0413c44}
+${B} ${tok("tabActive")}{color:var(--eva-orange) !important;text-shadow:0 0 10px #f06a2244}
 @media (max-width:1280px){${B} [data-phase]:has(> [data-slot="conversation.header"])::before{background-size:auto calc(100% - 72px),0 0,auto,auto;opacity:.6}}
 
 /* ── user bubble: crimson entry-plug plate ── */
@@ -214,25 +214,25 @@ ${md} :where(h1,h2){position:relative;padding:0 0 6px 12px;
   background:linear-gradient(90deg,#d8262e99,#d8262e00 60%) left bottom/100% 1px no-repeat}
 ${md} :where(h1,h2)::before{content:"";position:absolute;left:0;top:.18em;bottom:calc(6px + .18em);width:3px;background:${R}}
 ${md} h3{position:relative;padding-left:14px}
-${md} h3::before{content:"";position:absolute;left:0;top:50%;width:7px;height:7px;margin-top:-3.5px;background:${G};
-  clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);box-shadow:0 0 6px #3fe08a}
-${md} h4{color:${G}}
-${md} li::marker{color:${RH}}
+${md} h3::before{content:"";position:absolute;left:0;top:50%;width:7px;height:7px;margin-top:-3.5px;background:var(--eva-orange);
+  clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);box-shadow:0 0 6px #f06a22}
+${md} h4{color:var(--eva-orange)}
+${md} li::marker{color:var(--eva-orange)}
 ${md} strong{color:#fff2ea}
 ${md} a{color:${G} !important}
 ${md} blockquote{border-left:2px solid ${G} !important;background:linear-gradient(90deg,#3fe08a12,transparent 70%);padding:6px 0 6px 14px !important}
-${md} hr{background:linear-gradient(90deg,#d8262e,#d8262e33 40%,#3fe08a33 60%,#3fe08a) !important;height:1px !important;opacity:.6}
-${md} :not(pre)>code{color:var(--eva-green-hot) !important;border:.5px solid #3fe08a33}
-${md} [class*="_tableScroll_"] th{color:${G};letter-spacing:.06em;border-bottom:1px solid #d8262e88 !important}
+${md} hr{background:linear-gradient(90deg,#d8262e,#d8262e33 40%,#f06a2233 60%,#f06a22) !important;height:1px !important;opacity:.6}
+${md} :not(pre)>code{color:#ffa063 !important;border:.5px solid #f06a2233}
+${md} [class*="_tableScroll_"] th{color:var(--eva-orange);letter-spacing:.06em;border-bottom:1px solid #d8262e88 !important}
 ${md} [class*="_tableScroll_"] tr:hover td{background:#ff6a6a08}
 
 /* ── code blocks: dark terminal with a crimson rail ── */
 ${B} .md-code-block{border-radius:0 !important;box-shadow:inset 2px 0 0 #d8262eaa, inset 0 0 0 .5px #ff6a6a1f !important}
-${B} .md-code-block [data-code-block-banner]{font-family:"EVA Condensed",var(--ds-font-family-code),sans-serif;letter-spacing:.12em;color:${G};text-transform:uppercase}
+${B} .md-code-block [data-code-block-banner]{font-family:"EVA Condensed",var(--ds-font-family-code),sans-serif;letter-spacing:.12em;color:var(--eva-orange);text-transform:uppercase}
 
 /* ── composer: framed control panel ── */
 ${B} [data-composer-card]{
-  background:${corners("#3fe08a99")},var(--dsw-specific-input-major) !important;
+  background:${corners("#f06a22aa")},var(--dsw-specific-input-major) !important;
   box-shadow:inset 0 2px 0 -0px #d8262ecc, 0 0 0 .5px #ff6a6a2e, 0 12px 40px -18px #d8262e55 !important;
   border-radius:0 !important;
 }
