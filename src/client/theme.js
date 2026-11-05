@@ -65,8 +65,8 @@ export function themeTokens(unit = DEFAULT_UNIT) {
     "--dsw-alias-state-error-primary": p.redHot,
     "--dsw-alias-state-error-secondary": p.redHot,
     "--dsw-alias-state-idle-primary": p.faint,
-    "--dsw-alias-state-success-primary": "#5fb97c",
-    "--dsw-alias-state-success-secondary": "#7fcf98",
+    "--dsw-alias-state-success-primary": p.green,
+    "--dsw-alias-state-success-secondary": p.greenHot,
     "--dsw-alias-state-warn-primary": p.warn,
     "--dsw-alias-state-warn-secondary": "#f5c96a",
     "--dsw-alias-state-business-primary": p.orange,
@@ -229,6 +229,7 @@ ${md} [class*="_tableScroll_"] tr:hover td{background:#ff6a6a08}
 /* ── code blocks: dark terminal with a crimson rail ── */
 ${B} .md-code-block{border-radius:0 !important;box-shadow:inset 2px 0 0 #d8262eaa, inset 0 0 0 .5px #ff6a6a1f !important}
 ${B} .md-code-block [data-code-block-banner]{font-family:"EVA Condensed",var(--ds-font-family-code),sans-serif;letter-spacing:.12em;color:var(--eva-orange);text-transform:uppercase}
+${B} .md-code-block [data-code-block-banner]::before{content:"";display:inline-block;width:5px;height:5px;margin-right:8px;vertical-align:middle;background:${G};box-shadow:0 0 6px ${G};border-radius:50%}
 
 /* ── composer: framed control panel ── */
 ${B} [data-composer-card]{

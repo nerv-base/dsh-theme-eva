@@ -41,6 +41,8 @@
 
 /* ── sync plate (session header utilities) ── */
 .eva-sync{--eva-sync:#f06a22;display:inline-flex;align-items:center;gap:7px;height:24px;padding:0 8px 0 0;box-sizing:border-box;border:1px solid color-mix(in srgb,var(--eva-sync) 55%,transparent);font-family:"EVA Condensed",var(--eva-font-condensed),sans-serif;font-variant-numeric:tabular-nums;color:var(--dsw-alias-label-secondary);user-select:none;white-space:nowrap;clip-path:polygon(0 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%)}
+.eva-sync.is-ok .eva-sync-bar i.on{background:#3fe08a;box-shadow:0 0 4px #3fe08a88}
+.eva-sync.is-ok .eva-sync-value{color:#3fe08a;text-shadow:0 0 8px #3fe08a66}
 .eva-sync.is-warn{--eva-sync:#f0b53a}
 .eva-sync.is-critical{--eva-sync:#f0413c}
 .eva-sync.is-unknown{--eva-sync:#6f6462}
@@ -59,11 +61,12 @@
 [data-chat-running][data-eva-running]{color:#f0413c}
 .eva-running-power{display:flex;align-items:center;gap:10px;width:100%;min-width:0;min-height:28px;pointer-events:none;color:#f0413c}
 .eva-running-power b{flex:none;color:var(--eva-orange,#f06a22);font-family:"EVA Mincho",var(--eva-font-mincho),serif;font-weight:900;font-size:12px;letter-spacing:.12em;white-space:nowrap}
+.eva-running-power b::before{content:"";display:inline-block;width:6px;height:6px;margin-right:7px;vertical-align:1px;border-radius:50%;background:#3fe08a;box-shadow:0 0 8px #3fe08a;animation:eva-breathe 1.4s ease-in-out infinite}
 .eva-power-clock{flex:none;font-family:"EVA Condensed",var(--eva-font-condensed),sans-serif;font-variant-numeric:tabular-nums;font-weight:600;font-size:16px;letter-spacing:.06em;white-space:nowrap}
 .eva-power-clock small{font-size:11px;opacity:.75}
 .eva-power-line{flex:1;height:1px;max-width:220px;min-width:12px;background:linear-gradient(90deg,#f06a22,#f06a2288 50%,#f06a2200);opacity:.35;animation:eva-breathe 2.8s ease-in-out infinite}
 @keyframes eva-breathe{0%,100%{opacity:.18}50%{opacity:.75}}
-@media (prefers-reduced-motion:reduce){.eva-power-line{animation:none;opacity:.5}}
+@media (prefers-reduced-motion:reduce){.eva-power-line,.eva-running-power b::before{animation:none;opacity:.5}}
 @media (forced-colors:active){[data-chat-running][data-eva-running],.eva-running-power{color:CanvasText}.eva-power-line{background:CanvasText;animation:none;opacity:1}}
 
 /* ── cinematic host / static card ── */

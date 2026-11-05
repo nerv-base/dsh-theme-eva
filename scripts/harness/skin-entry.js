@@ -60,7 +60,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8"><style>${fonts}${
 <main class="x_root" data-phase="active">
   <div data-slot="conversation.header" style="display:contents"><header class="x_header">
     <div class="x_titleRow"><span class="x_crumbCurrent">参考项目为 dsh 设计主题</span><span class="x_util">
-      <span class="eva-sync"><span class="eva-sync-tag">SYNC</span><span class="eva-sync-bar">${"<i class=on></i>".repeat(9)}<i></i></span><span class="eva-sync-value">87.4<small>%</small></span></span></span></div>
+      <span class="eva-sync is-ok"><span class="eva-sync-tag">SYNC</span><span class="eva-sync-bar">${"<i class=on></i>".repeat(9)}<i></i></span><span class="eva-sync-value">87.4<small>%</small></span></span></span></div>
     <div class="x_tabs"><span class="x_tabActive">对话</span><span>轨迹</span><span>上下文</span></div>
   </header></div>
   <div class="x_scroll"><div class="x_column">
