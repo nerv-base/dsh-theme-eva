@@ -33,12 +33,92 @@ function ramp() {
   };
 }
 
+/**
+ * Accent ramps the shipped aliases and plugins reference directly: DeepSeek blue
+ * becomes Unit-02 orange, the generic blue becomes armour red, plain neutrals get
+ * the same crimson tint as the bluish ramp, and the semantic green/amber/red ramps
+ * move onto the EVA phosphor values.
+ */
+function accentRamps() {
+  return {
+    "--dsw-static-deepseek-50": "#2a170e",
+    "--dsw-static-deepseek-100": "#3a1f12",
+    "--dsw-static-deepseek-200": "#5a2e17",
+    "--dsw-static-deepseek-300": "#ffc7a3",
+    "--dsw-static-deepseek-400": "#ff8a3d",
+    "--dsw-static-deepseek-450": "#f6762d",
+    "--dsw-static-deepseek-500": "#f06a22",
+    "--dsw-static-deepseek-600": "#c9541a",
+    "--dsw-static-deepseek-700-delete": "#9a3f14",
+    "--dsw-static-deepseek-800": "#4a2412",
+    "--dsw-static-deepseek-900": "#2a170e",
+    "--dsw-static-blue-50": "#2a0c0f",
+    "--dsw-static-blue-50p": "#2a0c0f",
+    "--dsw-static-blue-75": "#33101a",
+    "--dsw-static-blue-100": "#3d1418",
+    "--dsw-static-blue-300": "#ffa58f",
+    "--dsw-static-blue-400": "#ff6a52",
+    "--dsw-static-blue-450": "#f0413c",
+    "--dsw-static-blue-500": "#d8262e",
+    "--dsw-static-blue-600": "#b62026",
+    "--dsw-static-blue-800": "#7d1a18",
+    "--dsw-static-blue-900": "#4e1218",
+    "--dsw-static-blue-950": "#2a0c0f",
+    "--dsw-static-neutral-50": "#ece4da",
+    "--dsw-static-neutral-100": "#d4c9bf",
+    "--dsw-static-neutral-150": "#c9bdb3",
+    "--dsw-static-neutral-200": "#bdb1a8",
+    "--dsw-static-neutral-250": "#b0a49c",
+    "--dsw-static-neutral-300": "#a59a93",
+    "--dsw-static-neutral-400": "#8b7f7a",
+    "--dsw-static-neutral-500": "#776b67",
+    "--dsw-static-neutral-550": "#655957",
+    "--dsw-static-neutral-600": "#54484a",
+    "--dsw-static-neutral-700": "#3b2e30",
+    "--dsw-static-neutral-800": "#2b2123",
+    "--dsw-static-neutral-850": "#1e1719",
+    "--dsw-static-neutral-900": "#0e0b0c",
+    "--dsw-static-green-400": "#5fe79c",
+    "--dsw-static-green-500": "#3fe08a",
+    "--dsw-static-green-500-a08": "#3fe08a14",
+    "--dsw-static-green-500-a12": "#3fe08a1f",
+    "--dsw-static-green-900": "#0d2e1f",
+    "--dsw-static-amber-400": "#f5c96a",
+    "--dsw-static-amber-500": "#f0b53a",
+    "--dsw-static-amber-600": "#d99a1e",
+    "--dsw-static-amber-900": "#2e2310",
+    "--dsw-static-red-400": "#f0413c",
+    "--dsw-static-red-400-a12": "#f0413c1f",
+    "--dsw-static-red-500": "#e0373a",
+    "--dsw-static-red-600": "#d8262e",
+    "--dsw-static-red-600-a08": "#d8262e14",
+    "--dsw-static-red-900": "#4e1218",
+  };
+}
+
+/** Syntax colours: orange constants, red keywords, soft phosphor strings. */
+function codeTokens() {
+  return {
+    "--shiki-token-constant": "#ff9a52",
+    "--shiki-token-string": "#7fdca4",
+    "--shiki-token-comment": "#7d706b",
+    "--shiki-token-keyword": "#ff5a52",
+    "--shiki-token-parameter": "#f5c96a",
+    "--shiki-token-function": "#ffc08f",
+    "--shiki-token-string-expression": "#a8ecc4",
+    "--shiki-token-punctuation": "#bdb1a8",
+    "--shiki-token-link": "#ff8a3d",
+  };
+}
+
 const alpha = (hex, a) => `color-mix(in srgb, ${hex} ${a}%, transparent)`;
 
 export function themeTokens(unit = DEFAULT_UNIT) {
   const p = unit.palette;
   return {
     ...ramp(),
+    ...accentRamps(),
+    ...codeTokens(),
     "--dsw-alias-bg-base": p.bg,
     "--dsw-alias-bg-layer-1": "#151113",
     "--dsw-alias-bg-layer-2": p.raised,
@@ -82,6 +162,21 @@ export function themeTokens(unit = DEFAULT_UNIT) {
     "--dsw-alias-switch-thumb": p.muted,
     "--dsw-alias-toast-bg": "#2a1c1f",
     "--dsw-focus-ring-color": p.orange,
+    "--dsw-alias-brand-primary-new-colorprimary-new-color": p.accent,
+    "--dsw-alias-button-info-fill": p.orange,
+    "--dsw-alias-button-info-hover": "#ff8a3d",
+    "--dsw-alias-label-deep-diving": "#e8823f",
+    "--dsw-alias-label-deep-diving-shimmer": "#ffd3ad",
+    "--dsw-alias-interactive-bg-hover-accent": "#ff8a8a3d",
+    "--dsw-alias-bg-mask-drop": "#2a1015b3",
+    "--dsw-alias-tooltip-bg": "#2a1c1f",
+    "--dsw-alias-state-warn-label": p.warn,
+    "--dsw-alias-state-success-tertiary": p.greenDeep,
+    "--dsw-alias-state-warn-tertiary": "#2e2310",
+    "--dsw-menu-surface-fill": "#2a1c1fcc",
+    "--dsw-alias-menu-group-header-fill": "#241a1cf0",
+    "--dsw-specific-selector": "#2b2123",
+    "--dsw-specific-bubble-highlight": "#4a1a20",
     "--dsw-specific-sidebar-fill": p.sidebar,
     "--dsw-specific-sidebar-nav-item-active": p.redDeep,
     "--dsw-specific-sidebar-nav-item-hover": "#24141a",
@@ -240,6 +335,11 @@ ${B} [data-composer-card]{
 ${B} [data-composer-card]:focus-within{
   box-shadow:inset 0 2px 0 0 #f0413c, 0 0 0 .5px #f06a2277, 0 0 22px -6px #f06a2244 !important}
 
+/* ── hard-coded tints in shipped panels ── */
+${B} [class*="_root_1alm6_"]{--json-tree-property:#ff9a52;--json-tree-string:#7fdca4;--json-tree-number:#f5c96a;--json-tree-keyword:#ff5a52;--json-tree-punctuation:#bdb1a8;--json-tree-icon:#8b7f7a}
+${B} ${tok("colorTools")}{--meter-tint:var(--eva-orange) !important}
+${B} ${tok("colorMessages")}{--meter-tint:var(--eva-accent) !important}
+
 /* ── system details ── */
 ${B} ::selection{background:#d8262e66;color:#fff}
 ${B} :focus-visible{outline-color:var(--eva-orange)}
@@ -345,6 +445,42 @@ export function installTheme(ctx, prefs, unit = DEFAULT_UNIT) {
       }
     });
   });
+
+  // Self-heal: a hot replacement or a Host style sweep can leave the theme
+  // half-applied (registration retracted, skin tag removed, preference reset).
+  const heal = () => {
+    if (!prefs.get().enabled) return;
+    if (fontTag && !fontTag.isConnected) document.head.appendChild(fontTag);
+    let snap;
+    try {
+      snap = ctx.theme.getTheme();
+    } catch {
+      return;
+    }
+    if (disposeTheme && !snap.themes?.some((t) => t.id === themeId)) {
+      disposeTheme = undefined;
+      styleTag?.remove();
+      styleTag = undefined;
+    }
+    if (!disposeTheme) {
+      if (!retryTimer) enable();
+      return;
+    }
+    if (styleTag && !styleTag.isConnected) document.head.appendChild(styleTag);
+    if (document.body.dataset.evaTheme !== unit.id) document.body.dataset.evaTheme = unit.id;
+    if (snap.preference !== themeId) {
+      try {
+        ctx.theme.setTheme(themeId);
+      } catch {
+        /* retracted meanwhile; the next tick re-registers */
+      }
+    }
+  };
+
+  ctx.effect(() => {
+    const timer = setInterval(heal, 1500);
+    return () => clearInterval(timer);
+  }, "dsh-theme-eva: self-heal");
 
   ctx.effect(() => {
     const off = prefs.subscribe(reconcile);

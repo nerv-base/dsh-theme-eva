@@ -24,7 +24,12 @@ export function apply(ctx) {
     tag.dataset.pluginCss = "dsh-theme-eva/ui";
     tag.textContent = uiCss;
     document.head.appendChild(tag);
-    return () => tag.remove();
+    // Host-side style sweeps (e.g. during a hot replacement) may drop the tag; put it back.
+    const heal = setInterval(() => tag.isConnected || document.head.appendChild(tag), 1500);
+    return () => {
+      clearInterval(heal);
+      tag.remove();
+    };
   }, "dsh-theme-eva: component styles");
 
   const prefs = createPrefs(ctx);
