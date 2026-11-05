@@ -14,6 +14,22 @@ While the theme is on, the appearance is locked to dark (EVA has no light mode).
 
 If the system setting **Reduce motion** is on, the 3D cinematic is replaced by a 2-second static title card, with no gates and no running indicator animation.
 
+## Screenshots
+
+Real 1920×1080 captures of the theme's code-rendered startup cinematic (not workbench screenshots or mockups).
+
+### Entry plug insertion
+
+![Entry plug insertion](https://raw.githubusercontent.com/nerv-base/dsh-theme-eva/main/docs/screenshots/entry-plug.png)
+
+### Nerve connection monitor
+
+![Nerve connection monitor](https://raw.githubusercontent.com/nerv-base/dsh-theme-eva/main/docs/screenshots/nerve-link.png)
+
+### Synchronization and boarding confirmation
+
+![Synchronization and boarding confirmation](https://raw.githubusercontent.com/nerv-base/dsh-theme-eva/main/docs/screenshots/synchronization.png)
+
 ## Install
 
 ```sh
