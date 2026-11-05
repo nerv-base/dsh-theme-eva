@@ -19,7 +19,7 @@ const common = {
   jsx: "transform",
   jsxFactory: "React.createElement",
   jsxFragment: "React.Fragment",
-  loader: { ".css": "text", ".jsx": "jsx" },
+  loader: { ".css": "text", ".jsx": "jsx", ".svg": "text" },
   minify,
   legalComments: "none",
   write: false,

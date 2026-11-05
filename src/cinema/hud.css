@@ -17,6 +17,9 @@
 }
 .evc-root.is-leaving { opacity: 0; }
 .evc-canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.evc-monitor { position: absolute; inset: 0; width: 100%; height: 100%; display: block; pointer-events: none; }
+.evc-root.is-monitor .evc-hud-top, .evc-root.is-monitor .evc-rule, .evc-root.is-monitor .evc-steps,
+.evc-root.is-monitor .evc-read, .evc-root.is-monitor .evc-caution, .evc-root.is-intertitle .evc-sub { opacity: 0 !important; transition: none !important; }
 .evc-mincho { font-family: "EVA Mincho", "Noto Serif CJK JP", "Hiragino Mincho ProN", "Yu Mincho", serif; font-weight: 900; letter-spacing: 0.02em; }
 
 /* ---------------- Start gate */

@@ -6,11 +6,10 @@ import uiCss from "./ui.css";
 import {
   BrandMark,
   BrandName,
-  HeroMark,
   makeSettingsRow,
   makeFooterReplay,
   makeSyncMeter,
-  makeScanBeam,
+  makeEdgeHint,
 } from "./components.jsx";
 import { makeCinemaOverlay } from "./cinemaHost.jsx";
 
@@ -44,17 +43,19 @@ export function apply(ctx) {
       makeFooterReplay(prefs),
     ),
   );
-  ctx.slots.inject("conversation.composer.dock", () =>
+  ctx.slots.inject("conversation.session.header.utilities", () =>
     ctx.slots.register(
-      { name: "conversation.composer.dock", id: "theme-eva-sync", order: 90, locale: LOCALE_NS },
+      { name: "conversation.session.header.utilities", id: "theme-eva-sync", order: 5, locale: LOCALE_NS },
       makeSyncMeter(prefs),
     ),
   );
+  ctx.slots.inject("conversation.input.dock", () =>
+    ctx.slots.register(
+      { name: "conversation.input.dock", id: "theme-eva-edge", order: 1000, locale: LOCALE_NS },
+      makeEdgeHint(prefs),
+    ),
+  );
   ctx.slots.inject("shell.overlay", function* () {
-    yield ctx.slots.register(
-      { name: "shell.overlay", id: "theme-eva-scan", order: 900 },
-      makeScanBeam(prefs),
-    );
     yield ctx.slots.register(
       { name: "shell.overlay", id: "theme-eva-cinema", order: 1000, locale: LOCALE_NS },
       makeCinemaOverlay(prefs),
@@ -65,7 +66,7 @@ export function apply(ctx) {
   const brandSeats = [
     ["sidebar.brand.mark", BrandMark],
     ["sidebar.brand.name", BrandName],
-    ["conversation.hero.brand.mark", HeroMark],
+    ["conversation.hero.brand.mark", BrandMark],
   ];
   for (const [name, Component] of brandSeats) {
     ctx.slots.inject(name, () => {

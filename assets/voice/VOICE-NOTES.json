@@ -32,8 +32,18 @@
       "voice": "ja-JP-NanamiNeural"
     },
     {
+      "file": "02-contact2.mp3",
+      "text": "第二次接続、開始。",
+      "voice": "ja-JP-NanamiNeural"
+    },
+    {
       "file": "02-a10.mp3",
       "text": "エーテン神経接続、異常なし。",
+      "voice": "ja-JP-NanamiNeural"
+    },
+    {
+      "file": "02-bidir.mp3",
+      "text": "双方向回線、開きます。",
       "voice": "ja-JP-NanamiNeural"
     },
     {

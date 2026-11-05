@@ -1,5 +1,10 @@
 // Theme registration (eva-02, dark-only) and the restrained everyday skin.
 import { DEFAULT_UNIT } from "../shared/units.js";
+import backdropRight from "./backdrop-right.svg";
+import backdropLeft from "./backdrop-left.svg";
+import markSvg from "./mark.svg";
+
+const svgUrl = (svg) => `url("data:image/svg+xml,${encodeURIComponent(svg.trim())}")`;
 
 export const FONT_BASE = "/eva-theme-assets";
 
@@ -102,7 +107,7 @@ export function fontFaceCss() {
 }
 
 /** Everyday skin: only active while body[data-eva-theme] is set. Chat and code stay untouched. */
-export function skinCss() {
+export function skinCss(unit = DEFAULT_UNIT) {
   return `
 body[data-eva-theme] [class*="_sidebarCol"]{
   background:
@@ -110,6 +115,27 @@ body[data-eva-theme] [class*="_sidebarCol"]{
     var(--dsw-specific-sidebar-fill) !important;
   border-right:.5px solid #3c3029 !important;
 }
+body[data-eva-theme] [data-phase]:has(> [data-slot="conversation.header"])::before{
+  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:
+    ${svgUrl(backdropRight)} right -24px top 52px / auto calc(100% - 72px) no-repeat,
+    ${svgUrl(backdropLeft)} left 18px bottom 96px / 250px auto no-repeat;
+}
+body[data-eva-theme] [data-phase]:has(> [data-slot="conversation.header"]) > [data-slot="conversation.header"] > *{position:relative;z-index:1}
+@media (max-width:980px){body[data-eva-theme] [data-phase]:has(> [data-slot="conversation.header"])::before{background-size:auto calc(100% - 72px),0 0;opacity:.6}}
+/* brand seat: the shipped brand entry outranks installed packages, so swap it in CSS */
+body[data-eva-theme] [class*="_brandMark"] > [data-slot="sidebar.brand.mark"] > *,
+body[data-eva-theme] [class*="_railMark"] > [data-slot="sidebar.brand.mark"] > *,
+body[data-eva-theme] [class*="_brandName"] > [data-slot="sidebar.brand.name"] > *{display:none!important}
+body[data-eva-theme] [class*="_brandMark"]:has(> [data-slot="sidebar.brand.mark"])::before,
+body[data-eva-theme] [class*="_railMark"]:has(> [data-slot="sidebar.brand.mark"])::before{
+  content:"";display:block;width:24px;height:24px;background:${svgUrl(markSvg)} center/contain no-repeat}
+body[data-eva-theme] [class*="_brandName"]:has(> [data-slot="sidebar.brand.name"])::before{
+  content:"${unit.kanji}";font-family:"EVA Mincho",serif;font-weight:900;font-size:19px;letter-spacing:.02em;
+  display:inline-block;transform:scaleX(.86);transform-origin:left center;margin-right:-6px;color:var(--eva-text,#e8e2d7)}
+body[data-eva-theme] [class*="_brandName"]:has(> [data-slot="sidebar.brand.name"])::after{
+  content:"UNIT-${unit.id} · DSH";font-family:"EVA Condensed",sans-serif;font-weight:600;font-size:11px;
+  letter-spacing:.16em;color:var(--eva-accent,#f06a22);align-self:flex-end;line-height:18px}
 body[data-eva-theme] ::selection{background:color-mix(in srgb,#f06a22 40%,transparent)}
 body[data-eva-theme] :focus-visible{outline-color:#f06a22}
 body[data-eva-theme] [class*="_sidebarCol"] [aria-current="page"],
@@ -148,18 +174,30 @@ export function installTheme(ctx, prefs, unit = DEFAULT_UNIT) {
     return pref === "light" || pref === "dark" || pref === "system" ? pref : "system";
   };
 
+  let retryTimer = 0;
+  let retries = 0;
+  const clearRetry = () => {
+    if (retryTimer) clearTimeout(retryTimer);
+    retryTimer = 0;
+  };
+
   const enable = () => {
     if (disposeTheme) return;
+    clearRetry();
     try {
       disposeTheme = ctx.theme.register(definition);
     } catch (error) {
-      console.warn("[dsh-theme-eva] theme registration failed", error);
+      // A hot reload can apply this copy before the previous copy has retracted
+      // the same theme id; keep trying briefly instead of giving up.
+      if (retries++ < 80) retryTimer = setTimeout(() => prefs.get().enabled && enable(), 250);
+      else console.warn("[dsh-theme-eva] theme registration failed", error);
       return;
     }
+    retries = 0;
     styleTag = document.createElement("style");
     styleTag.dataset.plugin = "dsh-theme-eva";
     styleTag.dataset.pluginCss = "dsh-theme-eva/skin";
-    styleTag.textContent = skinCss();
+    styleTag.textContent = skinCss(unit);
     document.head.appendChild(styleTag);
     document.body.dataset.evaTheme = unit.id;
     enforcing = true;
@@ -167,6 +205,7 @@ export function installTheme(ctx, prefs, unit = DEFAULT_UNIT) {
   };
 
   const disable = () => {
+    clearRetry();
     if (!disposeTheme) return;
     enforcing = false;
     // Restore the user's own durable appearance (light / dark / system) before

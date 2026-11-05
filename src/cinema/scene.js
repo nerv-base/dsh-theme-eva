@@ -57,10 +57,10 @@ export const T = {
   lclEnd: 12.4,
   electric: 11.6,
   electricEnd: 12.9,
-  power: 14.4,
+  power: 13.1,
   rainbowStart: 15.0,
   rainbowEnd: 19.6,
-  syncStart: 20.4,
+  syncStart: 20.6,
   syncStop: 25.4,
 };
 

@@ -39,37 +39,29 @@
 .eva-foot-btn{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;padding:0;border:none;background:none;cursor:pointer;color:var(--dsw-alias-label-secondary);border-radius:var(--dsw-radius-sm)}
 .eva-foot-btn:hover{background:var(--dsw-alias-interactive-bg-hover);color:#f06a22}
 
-/* ── sync meter ── */
-.eva-meter{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:6px 4px 2px;font-family:"EVA Condensed",var(--eva-font-condensed),sans-serif;color:var(--dsw-alias-label-tertiary);user-select:none;font-variant-numeric:tabular-nums;--eva-meter-color:#f06a22}
-.eva-meter.is-warn{--eva-meter-color:#e7bc35}
-.eva-meter.is-critical{--eva-meter-color:#e2453a}
-.eva-meter.is-unknown{--eva-meter-color:#6f6b66}
-.eva-meter-sync,.eva-meter-power{display:flex;align-items:center;gap:8px;min-width:0}
-.eva-meter-label{font-weight:600;font-size:10.5px;letter-spacing:.18em;color:var(--dsw-alias-label-tertiary)}
-.eva-meter-value{font-weight:700;font-size:15px;line-height:1;color:var(--eva-meter-color);min-width:44px}
-.eva-meter-value small{font-size:10px;margin-left:1px}
-.eva-meter-bar{display:flex;gap:2px;align-items:center}
-.eva-meter-bar i{width:4px;height:9px;background:#ffffff12;transform:skewX(-18deg)}
-.eva-meter-bar i.on{background:var(--eva-meter-color);box-shadow:0 0 4px color-mix(in srgb,var(--eva-meter-color) 60%,transparent)}
-.eva-meter-status{display:flex;align-items:baseline;gap:6px;white-space:nowrap;overflow:hidden}
-.eva-meter-status b{font-family:"EVA Mincho",var(--eva-font-mincho),serif;font-weight:900;font-size:11.5px;color:var(--eva-meter-color);letter-spacing:.04em}
-.eva-meter-status em{font-style:normal;font-size:10px;letter-spacing:.14em;opacity:.8}
-.eva-meter.is-warn .eva-meter-status b,.eva-meter.is-critical .eva-meter-status b{animation:eva-blink 1.1s steps(2,jump-none) infinite}
-.eva-meter-power .eva-meter-label{font-family:"EVA Mincho",var(--eva-font-mincho),serif;font-weight:900;letter-spacing:.06em;font-size:11px}
-.eva-meter-tag{font-weight:600;font-size:9.5px;letter-spacing:.18em;padding:1px 5px;border:1px solid currentColor;opacity:.75}
-.eva-meter-power.is-internal{color:#e2453a}
-.eva-meter-power.is-internal .eva-meter-label{color:#e2453a}
-.eva-meter-clock{font-weight:700;font-size:16px;line-height:1;color:#ff5a3a;text-shadow:0 0 6px #ff3a2a66;letter-spacing:.02em}
-.eva-meter-clock small{font-size:11px}
+/* ── sync plate (session header utilities) ── */
+.eva-sync{--eva-sync:#f06a22;display:inline-flex;align-items:center;gap:7px;height:24px;padding:0 8px 0 0;box-sizing:border-box;border:1px solid color-mix(in srgb,var(--eva-sync) 55%,transparent);font-family:"EVA Condensed",var(--eva-font-condensed),sans-serif;font-variant-numeric:tabular-nums;color:var(--dsw-alias-label-secondary);user-select:none;white-space:nowrap;clip-path:polygon(0 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%)}
+.eva-sync.is-warn{--eva-sync:#e7bc35}
+.eva-sync.is-critical{--eva-sync:#e2453a}
+.eva-sync.is-unknown{--eva-sync:#6f6b66}
+.eva-sync-tag{align-self:stretch;display:flex;align-items:center;padding:0 6px;background:var(--eva-sync);color:#0b0b0c;font-weight:700;font-size:10.5px;letter-spacing:.16em}
+.eva-sync-bar{display:flex;gap:2px}
+.eva-sync-bar i{width:3px;height:10px;background:#ffffff14;transform:skewX(-20deg)}
+.eva-sync-bar i.on{background:var(--eva-sync)}
+.eva-sync-value{font-weight:700;font-size:14px;line-height:1;color:var(--eva-sync);min-width:38px;text-align:right}
+.eva-sync-value small{font-size:9.5px;margin-left:1px;opacity:.8}
+.eva-sync-alert{font-family:"EVA Mincho",var(--eva-font-mincho),serif;font-weight:900;font-size:11.5px;color:var(--eva-sync);animation:eva-blink 1.1s steps(2,jump-none) infinite}
 @keyframes eva-blink{0%{opacity:1}50%{opacity:.25}}
-@media (max-width:560px){.eva-meter-bar,.eva-meter-status em{display:none}}
+@container (max-width:520px){.eva-sync-bar,.eva-sync-alert{display:none}}
 
-/* ── scan beam ── */
-.eva-scan{position:fixed;inset:0;pointer-events:none;z-index:2147483000;overflow:hidden}
-.eva-scan-beam{position:absolute;left:0;right:0;top:-30%;height:30%;background:linear-gradient(180deg,#f06a2200 0%,#f06a220d 60%,#f06a2224 96%,#ffb88f55 100%);mix-blend-mode:screen;animation:eva-scan 4.2s cubic-bezier(.45,.05,.55,.95) infinite}
-.eva-scan-edge{position:absolute;left:0;right:0;top:0;height:2px;background:linear-gradient(90deg,#b62026,#f06a22,#e7bc35,#f06a22,#b62026);background-size:200% 100%;opacity:.85;animation:eva-edge 1.6s linear infinite}
-@keyframes eva-scan{0%{transform:translateY(0)}100%{transform:translateY(434%)}}
-@keyframes eva-edge{to{background-position:-200% 0}}
+/* ── running edge hint: rides on the composer card's top edge ── */
+.eva-edge{position:relative;height:0;margin-bottom:calc(-1 * var(--dsh-composer-stack-gap,6px));width:100%;max-width:var(--dsh-composer-card-max-width);align-self:center;pointer-events:none;z-index:2}
+.eva-edge-line{position:absolute;left:18px;right:18px;top:var(--dsh-composer-stack-gap,6px);height:1px;background:linear-gradient(90deg,#f06a2200,#f06a22 22%,#ff8a3d 50%,#f06a22 78%,#f06a2200);opacity:.35;animation:eva-breathe 2.8s ease-in-out infinite}
+.eva-edge-clock{position:absolute;right:20px;bottom:2px;display:inline-flex;align-items:baseline;gap:6px;font-family:"EVA Condensed",var(--eva-font-condensed),sans-serif;font-variant-numeric:tabular-nums;font-weight:600;font-size:11.5px;letter-spacing:.06em;color:#e2453acc}
+.eva-edge-clock b{font-family:"EVA Mincho",var(--eva-font-mincho),serif;font-weight:900;font-size:10.5px;letter-spacing:.08em}
+.eva-edge-clock small{font-size:9.5px;opacity:.75}
+@keyframes eva-breathe{0%,100%{opacity:.18}50%{opacity:.75}}
+@media (prefers-reduced-motion:reduce){.eva-edge-line{animation:none;opacity:.5}}
 
 /* ── cinematic host / static card ── */
 .eva-cinema-host{position:fixed;inset:0;z-index:2147483600;background:#000;color:#e8e2d7}

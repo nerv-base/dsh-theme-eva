@@ -1,7 +1,7 @@
 // Brand marks, settings row, sidebar replay action, sync meter, overlays.
 import React from "react";
 import { DEFAULT_UNIT } from "../shared/units.js";
-import { runtime, useStore, setRunning, requestPlay } from "./store.js";
+import { runtime, useStore, requestPlay } from "./store.js";
 
 const unit = DEFAULT_UNIT;
 
@@ -202,91 +202,73 @@ function clock(ms) {
   return { main: `${pad(m)}:${pad(s)}`, cs: pad(cs) };
 }
 
+function syncState(pressure) {
+  const used = pressure?.projectedTokens ?? pressure?.pressureTokens;
+  const windowTokens = pressure?.contextWindow;
+  const known = typeof used === "number" && typeof windowTokens === "number" && windowTokens > 0;
+  const sync = known ? Math.max(0, Math.min(100, 100 - (used / windowTokens) * 100)) : undefined;
+  const level = sync === undefined ? "unknown" : sync < 10 ? "critical" : sync < 30 ? "warn" : "ok";
+  return { used, windowTokens, known, sync, level };
+}
+
+const LEVEL_TEXT = {
+  unknown: { ja: "接続待機", en: "STANDBY" },
+  ok: { ja: "ハーモニクス正常", en: "HARMONICS NORMAL" },
+  warn: { ja: "精神汚染", en: "MENTAL CONTAMINATION" },
+  critical: { ja: "シンクロ率低下", en: "SYNC RATIO FALLING" },
+};
+
+/** Session-header utility plate: SYNC = 100% − context occupancy. */
 export function makeSyncMeter(prefs) {
-  return function EvaSyncMeter({ t, useSession, useProjection }) {
+  return function EvaSyncMeter({ t, useProjection }) {
     const show = useStore(prefs.store, (s) => s.enabled && s.syncMeter);
-    const scan = useStore(prefs.store, (s) => s.enabled && s.scanBeam);
-    const running = useSession ? useSession((s) => s?.running === true) : false;
     const pressure = useProjection ? useProjection("contextPressure") : undefined;
-    const key = React.useId();
-
-    React.useEffect(() => {
-      setRunning(key, Boolean(running && scan));
-      return () => setRunning(key, false);
-    }, [key, running, scan]);
-
-    const elapsed = useTurnClock(Boolean(running && show));
     if (!show) return null;
-
-    const used = pressure?.projectedTokens ?? pressure?.pressureTokens;
-    const windowTokens = pressure?.contextWindow;
-    const known = typeof used === "number" && typeof windowTokens === "number" && windowTokens > 0;
-    const sync = known ? Math.max(0, Math.min(100, 100 - (used / windowTokens) * 100)) : undefined;
-    const level = sync === undefined ? "unknown" : sync < 10 ? "critical" : sync < 30 ? "warn" : "ok";
-    const status = {
-      unknown: { ja: "接続待機", en: "STANDBY" },
-      ok: { ja: "ハーモニクス正常", en: "HARMONICS NORMAL" },
-      warn: { ja: "精神汚染", en: "MENTAL CONTAMINATION" },
-      critical: { ja: "シンクロ率低下", en: "SYNC RATIO FALLING" },
-    }[level];
+    const { used, windowTokens, known, sync, level } = syncState(pressure);
+    const status = LEVEL_TEXT[level];
     const tooltip = known
-      ? fmt(t, "meter.tooltip", { used: used.toLocaleString(), window: windowTokens.toLocaleString() })
+      ? `${status.ja} · ${fmt(t, "meter.tooltip", { used: used.toLocaleString(), window: windowTokens.toLocaleString() })}`
       : t("meter.unknown");
-    const c = clock(elapsed);
-    const segments = 24;
-    const lit = sync === undefined ? 0 : Math.round((sync / 100) * segments);
-
+    const segments = 10;
+    const lit = sync === undefined ? 0 : Math.ceil((sync / 100) * segments - 0.001);
     return (
-      <div className={`eva-meter is-${level}`} role="status" title={tooltip}>
-        <div className="eva-meter-sync">
-          <span className="eva-meter-label">SYNC</span>
-          <span className="eva-meter-value">
-            {sync === undefined ? "--.-" : sync.toFixed(1)}
-            <small>%</small>
-          </span>
-          <span className="eva-meter-bar" aria-hidden="true">
-            {Array.from({ length: segments }, (_, i) => (
-              <i key={i} className={i < lit ? "on" : undefined} />
-            ))}
-          </span>
-          <span className="eva-meter-status">
-            <b>{status.ja}</b>
-            <em>{status.en}</em>
-          </span>
-        </div>
-        <div className={`eva-meter-power${running ? " is-internal" : ""}`} title={running ? t("meter.internal") : t("meter.external")}>
-          {running ? (
-            <>
-              <span className="eva-meter-label">内部電源</span>
-              <span className="eva-meter-clock">
-                {c.main}
-                <small>:{c.cs}</small>
-              </span>
-              <span className="eva-meter-tag">ACTIVE</span>
-            </>
-          ) : (
-            <>
-              <span className="eva-meter-label">外部電源</span>
-              <span className="eva-meter-tag">UMBILICAL</span>
-            </>
-          )}
-        </div>
+      <div className={`eva-sync is-${level}`} role="status" title={tooltip} aria-label={`SYNC ${sync === undefined ? "--" : sync.toFixed(1)}%`}>
+        <span className="eva-sync-tag">SYNC</span>
+        <span className="eva-sync-bar" aria-hidden="true">
+          {Array.from({ length: segments }, (_, i) => (
+            <i key={i} className={i < lit ? "on" : undefined} />
+          ))}
+        </span>
+        <span className="eva-sync-value">
+          {sync === undefined ? "--.-" : sync.toFixed(1)}
+          <small>%</small>
+        </span>
+        {level === "warn" || level === "critical" ? <span className="eva-sync-alert">{status.ja}</span> : null}
       </div>
     );
   };
 }
 
-/* ───────────── scan beam ───────────── */
+/* ───────────── running edge hint (above the composer card) ───────────── */
 
-export function makeScanBeam(prefs) {
-  return function EvaScanBeam() {
+export function makeEdgeHint(prefs) {
+  return function EvaEdgeHint({ t, useSession }) {
     const allowed = useStore(prefs.store, (s) => s.enabled && s.scanBeam);
-    const active = useStore(runtime, (s) => s.running.length > 0 && !s.playing);
-    if (!allowed || !active || prefersReducedMotion()) return null;
+    const running = useSession ? useSession((s) => s?.running === true) : false;
+    const playing = useStore(runtime, (s) => s.playing);
+    const elapsed = useTurnClock(Boolean(running && allowed));
+    if (!allowed || !running || playing) return null;
+    const c = clock(elapsed);
     return (
-      <div className="eva-scan" aria-hidden="true">
-        <div className="eva-scan-beam" />
-        <div className="eva-scan-edge" />
+      <div className="eva-edge" aria-hidden="true">
+        <span className="eva-edge-clock" title={t("meter.internal")}>
+          <b>内部電源</b>
+          <span>
+            {c.main}
+            <small>:{c.cs}</small>
+          </span>
+        </span>
+        <span className="eva-edge-line" />
       </div>
     );
   };

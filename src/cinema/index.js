@@ -4,6 +4,7 @@ import hudCss from "./hud.css";
 import { AudioEngine, Announcer, VoicePlayer } from "./audio.js";
 import { voiceFile, voiceLines } from "../shared/units.js";
 import { createScene, T } from "./scene.js";
+import { createMonitor, CUTS, cutAt } from "./monitor.js";
 
 const FINAL_AT = T.syncStop; // timeline resumes here after confirmation
 const TITLE_AT = FINAL_AT + 2.2;
@@ -51,6 +52,8 @@ export function mount(container, { unit, voice = true, voiceClips, strings = {},
   root.setAttribute("aria-label", unit.title.en);
   const canvas = el("canvas", "evc-canvas");
   root.appendChild(canvas);
+  const monitorCanvas = el("canvas", "evc-monitor");
+  root.appendChild(monitorCanvas);
 
   // Gate
   const gate = el(
@@ -159,7 +162,11 @@ export function mount(container, { unit, voice = true, voiceClips, strings = {},
   } catch (error) {
     console.warn("[dsh-theme-eva] WebGL unavailable, HUD-only cinematic", error);
   }
-  const resize = () => scene?.resize(root.clientWidth, root.clientHeight);
+  const monitor = createMonitor(monitorCanvas, unit);
+  const resize = () => {
+    scene?.resize(root.clientWidth, root.clientHeight);
+    monitor.resize(root.clientWidth, root.clientHeight);
+  };
   const ro = new ResizeObserver(resize);
   ro.observe(root);
   resize();
@@ -215,6 +222,15 @@ export function mount(container, { unit, voice = true, voiceClips, strings = {},
       say(unit.confirm);
     }],
   ];
+  // Monitor cuts: a feed-switch tick on every hard cut, a nerve ticker on the schematic.
+  CUTS.forEach((cut, i) => {
+    cues.push([cut.at, `cut${i}`, () => {
+      if (cut.kind === "title") audio?.beep(audio.now, 196, 0.22, 0.09);
+      else { audio?.beep(audio.now, 2093, 0.03, 0.05); audio?.whoosh(audio.now, 0.18, 3200, 900, 0.12); }
+      if (cut.kind === "neural") for (let k = 0; k < 14; k++) audio?.beep(audio.now + 0.08 + k * 0.075, 1320 + (k % 3) * 110, 0.025, 0.035);
+      if (cut.kind === "magi") [0.12, 0.26, 0.4].forEach((d) => audio?.beep(audio.now + d * 0.75 + 0.1, 1760, 0.06, 0.05));
+    }]);
+  });
   unit.script.forEach((line, i) => {
     cues.push([line.t, `line${i}`, () => say(line)]);
     const next = unit.script[i + 1]?.t ?? T.syncStop;
@@ -304,6 +320,10 @@ export function mount(container, { unit, voice = true, voiceClips, strings = {},
       scene.update(t, { fade, flash });
     }
 
+    const onMonitor = confirmedAt == null && monitor.update(t);
+    root.classList.toggle("is-monitor", onMonitor);
+    root.classList.toggle("is-intertitle", onMonitor && cutAt(t)?.kind === "title");
+
     // HUD
     hud.classList.toggle("is-on", t > 0.3 && !titleOn);
     clockEl.textContent = fmtClock(t);
@@ -346,8 +366,8 @@ export function mount(container, { unit, voice = true, voiceClips, strings = {},
     setRead("lcl", `${Math.round(lcl * 100)} %`, lcl);
     const press = lcl * 0.42 + (t >= T.electric ? 0.08 : 0);
     setRead("press", `${press.toFixed(2)} MPa`, press / 0.5, t >= T.electric && t < T.electricEnd);
-    const a10 = clamp((t - (T.power + 3)) / 2.4);
-    setRead("a10", t < T.power + 3 ? "OFFLINE" : a10 < 1 ? `LINKING ${Math.round(a10 * 100)}%` : "NOMINAL", a10);
+    const a10 = clamp((t - (T.power + 4.3)) / 1.2);
+    setRead("a10", t < T.power + 4.3 ? "OFFLINE" : a10 < 1 ? `LINKING ${Math.round(a10 * 100)}%` : "NOMINAL", a10);
 
     const s = syncAt(t, confirmedAt);
     sync.classList.toggle("is-on", t >= T.syncStart - 0.2);
@@ -433,6 +453,7 @@ export function mount(container, { unit, voice = true, voiceClips, strings = {},
       voices?.stop();
       audio?.close();
       scene?.dispose();
+      monitor.dispose();
       root.remove();
       style.remove();
     },
