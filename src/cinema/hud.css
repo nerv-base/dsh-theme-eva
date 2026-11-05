@@ -236,12 +236,38 @@
   color: #a29e97;
   background: #0b0b0c99;
   border: 1px solid #33312e;
-  padding: 7px 12px;
+  padding: 7px 12px 9px;
   cursor: pointer;
   border-radius: 0;
+  user-select: none;
+  touch-action: none;
+  overflow: hidden;
+  transition: color 0.15s, border-color 0.15s;
 }
 .evc-skip:hover { color: #e8e2d7; border-color: var(--evc-accent); }
-.evc-skip kbd { font: inherit; font-size: 10px; border: 1px solid #4a4440; padding: 1px 5px; color: #6f6b66; }
+.evc-skip kbd { font: inherit; font-size: 10px; border: 1px solid #4a4440; padding: 1px 5px; color: #6f6b66; transition: color 0.15s, border-color 0.15s; }
+/* hold progress: thin bar along the bottom edge + a faint fill behind the label */
+.evc-skip-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: #f06a2222; pointer-events: none; }
+.evc-skip-bar b {
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, #d8262e, #f06a22);
+  box-shadow: 0 0 8px #f06a22aa;
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+.evc-skip::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(90deg, #d8262e33, #f06a2214);
+  transform: scaleX(var(--evc-hold, 0)); transform-origin: left center;
+  opacity: 0; transition: opacity 0.15s;
+}
+.evc-skip.is-armed::before { opacity: 1; }
+.evc-skip.is-armed { color: #e8e2d7; border-color: #f06a22aa; }
+.evc-skip.is-armed kbd { color: #f06a22; border-color: #f06a22aa; }
+.evc-skip.is-holding kbd { background: #f06a2222; }
+.evc-skip.is-done { color: #fff; border-color: #f06a22; }
+.evc-skip > * { position: relative; }
+.evc-skip > .evc-skip-bar { position: absolute; }
 
 @media (max-width: 760px) {
   .evc-steps, .evc-read { display: none; }

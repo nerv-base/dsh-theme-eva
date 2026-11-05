@@ -139,7 +139,11 @@ export function mount(container, { unit, voice = true, voiceClips, strings = {},
   );
   root.appendChild(title);
 
-  const skip = el("button", "evc-skip", `<span>${esc(strings.skip || "SKIP")}</span><kbd>Esc</kbd>`);
+  const skip = el(
+    "button",
+    "evc-skip",
+    `<span class="evc-skip-label">${esc(strings.skip || "HOLD TO SKIP")}</span><kbd>Esc</kbd><i class="evc-skip-bar"><b></b></i>`,
+  );
   skip.type = "button";
   skip.title = strings.skipHint || "";
   root.appendChild(skip);
@@ -426,11 +430,62 @@ export function mount(container, { unit, voice = true, voiceClips, strings = {},
     setTimeout(() => onDone?.(), 600);
   }
 
+  // Hold-to-skip: Esc (or pressing the skip button) must be held for HOLD_MS;
+  // releasing early drains the bar back instead of skipping.
+  const HOLD_MS = 1200;
+  const skipFill = skip.querySelector(".evc-skip-bar b");
+  let holdKeys = 0; // bitmask: 1 = Esc key, 2 = pointer
+  let holdProgress = 0;
+  let holdLast = 0;
+  let holdRaf = 0;
+  const holdTick = (now) => {
+    // Cap the step so a stalled frame cannot complete the hold in one jump.
+    const dt = holdLast ? Math.min(100, now - holdLast) : 16;
+    holdLast = now;
+    holdProgress = holdKeys
+      ? Math.min(1, holdProgress + dt / HOLD_MS)
+      : Math.max(0, holdProgress - dt / (HOLD_MS * 0.35));
+    skipFill.style.transform = `scaleX(${holdProgress})`;
+    skip.style.setProperty("--evc-hold", String(holdProgress));
+    skip.classList.toggle("is-holding", holdKeys !== 0 && holdProgress > 0);
+    skip.classList.toggle("is-armed", holdProgress > 0);
+    if (holdProgress >= 1) {
+      holdRaf = 0;
+      skip.classList.add("is-done");
+      finish();
+      return;
+    }
+    holdRaf = holdProgress > 0 || holdKeys ? requestAnimationFrame(holdTick) : 0;
+    if (!holdRaf) holdLast = 0;
+  };
+  const holdOn = (bit) => {
+    if (finished) return;
+    if (!holdKeys && !holdProgress && !holdRaf) audio?.beep(audio.now, 880, 0.05, 0.03);
+    holdKeys |= bit;
+    if (!holdRaf) holdRaf = requestAnimationFrame(holdTick);
+  };
+  const holdOff = (bit) => {
+    holdKeys &= ~bit;
+    if (holdKeys === 0 && !holdRaf && holdProgress > 0) holdRaf = requestAnimationFrame(holdTick);
+  };
+
+  const onKeyUp = (e) => {
+    if (e.key === "Escape") {
+      e.preventDefault();
+      e.stopPropagation();
+      holdOff(1);
+    }
+  };
+  const onBlur = () => {
+    holdOff(1);
+    holdOff(2);
+  };
+
   const onKey = (e) => {
     if (e.key === "Escape") {
       e.preventDefault();
       e.stopPropagation();
-      finish();
+      if (!e.repeat) holdOn(1);
       return;
     }
     if (!started) {
@@ -444,12 +499,25 @@ export function mount(container, { unit, voice = true, voiceClips, strings = {},
     }
   };
   window.addEventListener("keydown", onKey, true);
+  window.addEventListener("keyup", onKeyUp, true);
+  window.addEventListener("blur", onBlur);
   gate.addEventListener("click", start);
   confirm.querySelector("button").addEventListener("click", doConfirm);
-  skip.addEventListener("click", (e) => {
+  skip.addEventListener("pointerdown", (e) => {
+    e.preventDefault();
     e.stopPropagation();
-    finish();
+    skip.setPointerCapture?.(e.pointerId);
+    holdOn(2);
   });
+  const release = (e) => {
+    e.stopPropagation();
+    holdOff(2);
+  };
+  skip.addEventListener("pointerup", release);
+  skip.addEventListener("pointercancel", release);
+  skip.addEventListener("lostpointercapture", () => holdOff(2));
+  // A plain click must not skip, and must not reach the gate behind it.
+  skip.addEventListener("click", (e) => e.stopPropagation());
   gate.focus?.();
   raf = requestAnimationFrame(frame);
 
@@ -464,7 +532,10 @@ export function mount(container, { unit, voice = true, voiceClips, strings = {},
     },
     dispose() {
       cancelAnimationFrame(raf);
+      cancelAnimationFrame(holdRaf);
       window.removeEventListener("keydown", onKey, true);
+      window.removeEventListener("keyup", onKeyUp, true);
+      window.removeEventListener("blur", onBlur);
       ro.disconnect();
       announcer?.dispose();
       voices?.stop();

@@ -29,7 +29,7 @@ window.__ModuleLoader__ = {
       unit: window.__evaUnit,
       voice: true,
       voiceClips: () => loadVoiceChunk().then((m) => m.clips),
-      strings: { gateHint: "点击或按任意键接入", skip: "跳过", skipHint: "Esc 跳过", confirm: "确认搭乘" },
+      strings: { gateHint: "点击或按任意键接入", skip: "长按跳过", skipHint: "长按 Esc 或按住此按钮跳过", confirm: "确认搭乘" },
       onDone() { window.__evaDone = true; },
     });
   },
