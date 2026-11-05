@@ -2,16 +2,17 @@
 
 An EVA Unit-02 theme for DeepSeek Harness (DSH).
 
-- **Entry cinematic.** Every time the page opens: start gate → entry plug inserted into the spine socket → plug lock → LCL floods the cabin and is electrified → main power, A10 nerve connection → sync ratio climbs to 99.2% and waits for the pilot to confirm → 100% → 「弐号機 起動」 title card → workbench. Built in three.js and loaded only while it plays. Click **Skip** or press **Esc** at any time.
-- **Sync meter.** Under the composer: sync ratio = 100% − context window occupancy, taken from the session's real context pressure. Below 30% it turns orange (精神汚染), below 10% red (シンクロ率低下). While a turn runs, the meter switches to **internal power** and counts the turn's elapsed time; when idle it shows **external power (umbilical)**.
-- **Scan beam.** A thin orange beam sweeps the window while a session is running.
+- **Entry cinematic.** Every time the page opens: start gate → entry plug inserted into the spine socket → plug lock → LCL floods the cabin and is electrified → hard cuts to command-room monitor screens (main power distribution, a nerve-connection schematic lighting up limb by limb, brain-region vital traces for the A10 link, a three-computer vote) between Mincho intertitle cards → sync ratio climbs to 99.2% and waits for the pilot to confirm → 100% → 「弐号機 起動」 title card → workbench. 3D cabin in three.js plus 2D canvas monitors, loaded only while it plays. Click **Skip** or press **Esc** at any time.
+- **Sync plate.** A small plate in the session header: sync ratio = 100% − context window occupancy, taken from the session's real context pressure. Below 30% it turns orange (精神汚染), below 10% red (シンクロ率低下).
+- **Running indicator.** While a turn runs, a faint orange line breathes along the top edge of the composer with an 「内部電源」 clock counting the turn's elapsed time.
+- **Backdrop.** Original monitor-style graphics behind the conversation: a faint 弐 watermark, hex grid, vertical captions, phase list and caution stripes (drawn from the OFL fonts as outlines; no third-party artwork).
 - **Everyday skin.** Kept restrained so chat and code stay readable: Unit-02 palette, square corners, a red gradient at the top of the sidebar, a "02" unit mark, and Mincho titles. Messages and code blocks keep DSH's own fonts.
 
-Settings live in **Settings → General → EVA 接入 / EVA Link**: theme, cinematic, voice and sound, scan beam and sync meter can each be turned off, and there is a **Replay** button. The sidebar footer has a **重新接入 / Re-link** button too.
+Settings live in **Settings → General → EVA 接入 / EVA Link**: theme, cinematic, voice and sound, running indicator and sync plate can each be turned off, and there is a **Replay** button. The sidebar footer has a **重新接入 / Re-link** button too.
 
 While the theme is on, the appearance is locked to dark (EVA has no light mode). Turning it off restores your own light/dark/system setting.
 
-If the system setting **Reduce motion** is on, the 3D cinematic is replaced by a 2-second static title card, with no gates and no scan beam.
+If the system setting **Reduce motion** is on, the 3D cinematic is replaced by a 2-second static title card, with no gates and no running indicator animation.
 
 ## Install
 
