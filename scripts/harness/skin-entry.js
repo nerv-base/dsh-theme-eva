@@ -44,7 +44,7 @@ body{font:14px/1.6 -apple-system,"PingFang SC",sans-serif;color:var(--dsw-alias-
 .x_tableScroll_ table{border-collapse:collapse;width:100%}.x_tableScroll_ th,.x_tableScroll_ td{text-align:left;padding:8px 12px;border-bottom:.5px solid var(--dsw-alias-border-l2)}
 .x_seat{position:absolute;left:0;right:0;bottom:0;padding:0 24px 16px;z-index:2;display:flex;flex-direction:column;align-items:center}
 .x_card{width:100%;max-width:800px;min-height:110px;background:var(--dsw-specific-input-major);border-radius:var(--dsw-radius-xl);padding:14px 16px;display:flex;flex-direction:column;justify-content:space-between;color:var(--dsw-alias-label-caption)}
-.x_send{width:34px;height:34px;border-radius:50%;background:var(--dsw-alias-brand-primary);align-self:flex-end}
+.x_send{width:34px;height:34px;border:none;border-radius:50%;corner-shape:round;background:var(--dsw-alias-brand-primary);color:#fff}.x_bar{display:flex;align-items:center;gap:10px}.x_add{width:28px;height:28px;border:none;border-radius:999px;corner-shape:round;background:#2b2123;color:#ece4da}.x_pill{padding:3px 10px;border-radius:999px;background:var(--dsw-alias-bg-layer-3);font-size:12px;color:var(--dsw-alias-label-secondary)}.x_avatar{width:26px;height:26px;border-radius:50%;background:#a59a93;display:inline-block}.x_dot{width:7px;height:7px;border-radius:50%;background:var(--dsw-alias-state-success-primary);display:inline-block;margin-right:6px}
 `;
 
 const sessions = ["为 dsh 打造 EVA 二号机主题", "在 nerv-base 组织建仓库", "查看现有 PR", "Word 与 PDF 排版不一致", "完成 ML 实验六"];
@@ -56,7 +56,7 @@ const html = `<!doctype html><html><head><meta charset="utf-8"><style>${fonts}${
   <div class="x_nav">插件</div><div class="x_nav x_panelRow x_panelActive">插件市场</div><div class="x_nav">任务看板</div><div class="x_nav">技能中心</div>
   <div class="x_sec">会话</div>
   ${sessions.map((s, i) => `<div class="x_sessionRow${i === 0 ? " x_selected" : ""}">${s}</div>`).join("")}
-</aside>
+<div style="margin-top:auto;display:flex;align-items:center;gap:8px;padding:6px"><i class="x_avatar"></i>Zzstar</div></aside>
 <main class="x_root" data-phase="active">
   <div data-slot="conversation.header" style="display:contents"><header class="x_header">
     <div class="x_titleRow"><span class="x_crumbCurrent">参考项目为 dsh 设计主题</span><span class="x_util">
@@ -78,7 +78,7 @@ if (sync &lt; 30) alert("精神汚染");</pre></div>
       <hr><p>状态：<span class="eva-running-power" style="display:inline-flex;width:auto"><b>内部電源</b><span class="eva-power-clock">00:12<small>:48</small></span><i class="eva-power-line" style="width:120px"></i></span></p>
     </div>
   </div></div>
-  <div class="x_seat"><div class="x_card" data-composer-card tabindex="0"><span>发消息或创建任务，/ 调用指令，@ 文件或对话</span><span class="x_send"></span></div></div>
+  <div class="x_seat"><div class="x_card" data-composer-card tabindex="0"><span>发消息或创建任务，/ 调用指令，@ 文件或对话</span><div class="x_bar"><button class="x_add">+</button><span class="x_pill">完全权限</span><span class="x_pill"><i class="x_dot"></i>claude-opus-5-5 High</span><span style="flex:1"></span><button class="x_send">↑</button></div></div></div>
 </main></body></html>`;
 
 export default html;

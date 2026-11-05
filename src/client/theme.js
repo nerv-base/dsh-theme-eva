@@ -185,12 +185,14 @@ export function themeTokens(unit = DEFAULT_UNIT) {
     "--dsw-specific-menu": "#1a1315f5",
     "--dsw-specific-bubble": "#2a1216",
     "--dsw-specific-tip": "#2a1c1f",
-    "--dsw-radius-xs": "0px",
-    "--dsw-radius-sm": "2px",
-    "--dsw-radius-md": "2px",
-    "--dsw-radius-lg": "3px",
-    "--dsw-radius-xl": "4px",
-    "--dsw-radius-panel": "4px",
+    // Armour-plate geometry: real radii, rendered as chamfers (corner-shape: bevel).
+    "--dsw-radius-xs": "2px",
+    "--dsw-radius-sm": "4px",
+    "--dsw-radius-md": "6px",
+    "--dsw-radius-lg": "8px",
+    "--dsw-radius-xl": "10px",
+    "--dsw-radius-panel": "14px",
+    "--dsw-corner-shape": "bevel",
     "--eva-accent": p.accent,
     "--eva-accent-hot": p.accentHot,
     "--eva-red": p.red,
@@ -218,15 +220,6 @@ export function fontFaceCss() {
 /** Exact hashed-class token match ("_name" as a whole class token), version-hash agnostic. */
 const tok = (name) => `:is([class*="_${name} "],[class$="_${name}"])`;
 
-/** Corner-bracket background layers (green L marks) for framed surfaces. */
-const corners = (c, len = 9, w = 1) =>
-  ["top left", "top right", "bottom left", "bottom right"]
-    .flatMap((pos) => [
-      `linear-gradient(${c},${c}) ${pos}/${len}px ${w}px no-repeat`,
-      `linear-gradient(${c},${c}) ${pos}/${w}px ${len}px no-repeat`,
-    ])
-    .join(",");
-
 /**
  * Everyday skin, active only while body[data-eva-theme] is set.
  * Unit-02 language: crimson armour for identity and actions, eye-green
@@ -251,7 +244,7 @@ ${B} [class*="_sidebarCol"]{
 ${B} ${tok("newSession")}:not([class*="_collapsed"] *){
   background:linear-gradient(90deg,#d8262e2e,#d8262e12) !important;
   border:1px solid #d8262e66 !important;
-  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
+  border-radius:8px !important;
 }
 ${B} ${tok("newSession")}:not([class*="_collapsed"] *):hover{background:linear-gradient(90deg,#d8262e55,#d8262e22) !important;border-color:${RH} !important}
 ${B} ${tok("sessionRow")}${tok("selected")},
@@ -299,8 +292,7 @@ ${B} ${tok("tabActive")}{color:var(--eva-orange) !important;text-shadow:0 0 10px
 ${B} ${tok("userRow")} ${tok("bubble")}{
   background:linear-gradient(135deg,#3a1219 0,#25101400 70%),var(--dsw-specific-bubble) !important;
   border-left:2px solid ${R};
-  border-radius:0 !important;
-  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);
+  border-radius:0 12px 0 12px !important;
   box-shadow:inset 0 1px 0 #ff6a6a1f;
 }
 
@@ -322,18 +314,26 @@ ${md} [class*="_tableScroll_"] th{color:var(--eva-orange);letter-spacing:.06em;b
 ${md} [class*="_tableScroll_"] tr:hover td{background:#ff6a6a08}
 
 /* ── code blocks: dark terminal with a crimson rail ── */
-${B} .md-code-block{border-radius:0 !important;box-shadow:inset 2px 0 0 #d8262eaa, inset 0 0 0 .5px #ff6a6a1f !important}
+${B} .md-code-block{border-radius:var(--dsw-radius-lg) !important;box-shadow:inset 2px 0 0 #d8262eaa, inset 0 0 0 .5px #ff6a6a1f !important}
 ${B} .md-code-block [data-code-block-banner]{font-family:"EVA Condensed",var(--ds-font-family-code),sans-serif;letter-spacing:.12em;color:var(--eva-orange);text-transform:uppercase}
 ${B} .md-code-block [data-code-block-banner]::before{content:"";display:inline-block;width:5px;height:5px;margin-right:8px;vertical-align:middle;background:${G};box-shadow:0 0 6px ${G};border-radius:50%}
 
 /* ── composer: framed control panel ── */
 ${B} [data-composer-card]{
-  background:${corners("#f06a22aa")},var(--dsw-specific-input-major) !important;
-  box-shadow:inset 0 2px 0 -0px #d8262ecc, 0 0 0 .5px #ff6a6a2e, 0 12px 40px -18px #d8262e55 !important;
-  border-radius:0 !important;
+  background:var(--dsw-specific-input-major) !important;
+  box-shadow:inset 0 2px 0 0 #d8262ecc, 0 0 0 1px #f06a2240, 0 12px 40px -18px #d8262e55 !important;
+  border-radius:var(--dsw-radius-xl) 14px var(--dsw-radius-xl) 14px !important;
 }
 ${B} [data-composer-card]:focus-within{
-  box-shadow:inset 0 2px 0 0 #f0413c, 0 0 0 .5px #f06a2277, 0 0 22px -6px #f06a2244 !important}
+  box-shadow:inset 0 2px 0 0 #f0413c, 0 0 0 1px #f06a2299, 0 0 22px -6px #f06a2244 !important}
+
+/* ── geometry: one shape language — chamfered armour plates, no round corners ──
+   DSH routes most corners through --dsw-corner-shape, but some controls pin
+   corner-shape:round or a 999px / 50% pill; normalise all of them. */
+${B} *,${B} *::before,${B} *::after{corner-shape:bevel !important}
+${B} :is(img,video,canvas,picture,[class*="vatar"],[class*="vatar"] *){corner-shape:round !important}
+${B} :is(button,[role="button"],[role="switch"],[role="tab"],[role="menuitem"],[role="option"],kbd,input,select){border-radius:5px !important}
+${B} :is(textarea,[contenteditable="true"]){border-radius:0 !important}
 
 /* ── hard-coded tints in shipped panels ── */
 ${B} [class*="_root_1alm6_"]{--json-tree-property:#ff9a52;--json-tree-string:#7fdca4;--json-tree-number:#f5c96a;--json-tree-keyword:#ff5a52;--json-tree-punctuation:#bdb1a8;--json-tree-icon:#8b7f7a}
