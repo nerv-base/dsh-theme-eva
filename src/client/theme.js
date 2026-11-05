@@ -8,82 +8,88 @@ const svgUrl = (svg) => `url("data:image/svg+xml,${encodeURIComponent(svg.trim()
 
 export const FONT_BASE = "/eva-theme-assets";
 
-/** Warm Unit-02 ramp replacing the bluish neutral ramp the dark aliases reference. */
+/** Crimson-tinted neutral ramp replacing the bluish ramp the dark aliases reference. */
 function ramp() {
   return {
-    "--dsw-static-neutral-bluish-00": "#fff8f0",
-    "--dsw-static-neutral-bluish-50": "#e8e2d7",
-    "--dsw-static-neutral-bluish-60": "#e2dbd0",
-    "--dsw-static-neutral-bluish-75": "#dad2c6",
-    "--dsw-static-neutral-bluish-100": "#d2cabd",
-    "--dsw-static-neutral-bluish-150": "#c8c0b3",
-    "--dsw-static-neutral-bluish-200": "#bcb4a8",
-    "--dsw-static-neutral-bluish-300": "#bdb6ab",
-    "--dsw-static-neutral-bluish-400": "#a29e97",
-    "--dsw-static-neutral-bluish-500": "#8a857e",
-    "--dsw-static-neutral-bluish-600": "#6f6b66",
-    "--dsw-static-neutral-bluish-700": "#4a4440",
-    "--dsw-static-neutral-bluish-750": "#3a3532",
-    "--dsw-static-neutral-bluish-800": "#2a2726",
-    "--dsw-static-neutral-bluish-850": "#1d1c1c",
-    "--dsw-static-neutral-bluish-875": "#161617",
-    "--dsw-static-neutral-bluish-900": "#121315",
-    "--dsw-static-neutral-bluish-950": "#0b0b0c",
-    "--dsw-static-neutral-bluish-1000": "#070606",
+    "--dsw-static-neutral-bluish-00": "#fff7f2",
+    "--dsw-static-neutral-bluish-50": "#ece4da",
+    "--dsw-static-neutral-bluish-60": "#e5dcd2",
+    "--dsw-static-neutral-bluish-75": "#ddd3c9",
+    "--dsw-static-neutral-bluish-100": "#d4c9bf",
+    "--dsw-static-neutral-bluish-150": "#c9bdb3",
+    "--dsw-static-neutral-bluish-200": "#bdb1a8",
+    "--dsw-static-neutral-bluish-300": "#bcaea6",
+    "--dsw-static-neutral-bluish-400": "#a59a93",
+    "--dsw-static-neutral-bluish-500": "#8b7f7a",
+    "--dsw-static-neutral-bluish-600": "#6f6462",
+    "--dsw-static-neutral-bluish-700": "#4b3c3d",
+    "--dsw-static-neutral-bluish-750": "#3b2e30",
+    "--dsw-static-neutral-bluish-800": "#2b2123",
+    "--dsw-static-neutral-bluish-850": "#1e1719",
+    "--dsw-static-neutral-bluish-875": "#171214",
+    "--dsw-static-neutral-bluish-900": "#131012",
+    "--dsw-static-neutral-bluish-950": "#0b090a",
+    "--dsw-static-neutral-bluish-1000": "#060405",
   };
 }
+
+const alpha = (hex, a) => `color-mix(in srgb, ${hex} ${a}%, transparent)`;
 
 export function themeTokens(unit = DEFAULT_UNIT) {
   const p = unit.palette;
   return {
     ...ramp(),
     "--dsw-alias-bg-base": p.bg,
-    "--dsw-alias-bg-layer-1": "#141415",
+    "--dsw-alias-bg-layer-1": "#151113",
     "--dsw-alias-bg-layer-2": p.raised,
-    "--dsw-alias-bg-layer-3": "#242222",
-    "--dsw-alias-bg-overlay": "#3a3532",
-    "--dsw-alias-bg-module-platform": "#242222",
+    "--dsw-alias-bg-layer-3": "#251c1e",
+    "--dsw-alias-bg-overlay": "#3b2e30",
+    "--dsw-alias-bg-module-platform": "#221a1c",
     "--dsw-alias-bg-document-preview": p.bg,
-    "--dsw-alias-bg-document-selection": "color-mix(in srgb, #f06a22 38%, transparent)",
-    "--dsw-alias-border-l1": "#ffe6cc0f",
-    "--dsw-alias-border-l2": "#ffe6cc1f",
-    "--dsw-alias-border-l3": "#ffe6cc2b",
-    "--dsw-alias-border-l4": "#ffe6cc38",
+    "--dsw-alias-bg-document-selection": alpha(p.accent, 36),
+    "--dsw-alias-border-l1": "#ff5a5a12",
+    "--dsw-alias-border-l2": "#ff6a6a21",
+    "--dsw-alias-border-l3": "#ff7a7a2e",
+    "--dsw-alias-border-l4": "#ff8a8a3b",
     "--dsw-alias-brand-primary": p.accent,
     "--dsw-alias-brand-text": p.text,
     "--dsw-alias-button-primary-hover": p.accentHot,
     "--dsw-alias-button-contrast-fill": p.text,
     "--dsw-alias-label-primary": p.text,
     "--dsw-alias-label-primary-bluish": p.text,
-    "--dsw-alias-label-secondary": "#bdb6ab",
+    "--dsw-alias-label-secondary": "#c2b6ad",
     "--dsw-alias-label-tertiary": p.muted,
     "--dsw-alias-label-caption": p.faint,
-    "--dsw-alias-label-primary-foreground": "#140a05",
-    "--dsw-alias-link": p.accentHot,
-    "--dsw-alias-state-error-primary": "#e2453a",
-    "--dsw-alias-state-error-secondary": "#e2453a",
+    "--dsw-alias-label-primary-foreground": "#fff4ee",
+    "--dsw-alias-link": p.green,
+    "--dsw-alias-state-error-primary": p.redHot,
+    "--dsw-alias-state-error-secondary": p.redHot,
     "--dsw-alias-state-idle-primary": p.faint,
-    "--dsw-alias-state-success-primary": p.ok,
-    "--dsw-alias-state-success-secondary": "#7bd38a",
+    "--dsw-alias-state-success-primary": p.green,
+    "--dsw-alias-state-success-secondary": p.greenHot,
     "--dsw-alias-state-warn-primary": p.warn,
-    "--dsw-alias-state-warn-secondary": "#f0cd5a",
-    "--dsw-alias-state-business-primary": p.accent,
-    "--dsw-alias-interactive-bg-hover": "#ffd9b814",
-    "--dsw-alias-interactive-bg-active": "#ffd9b824",
-    "--dsw-alias-interactive-bg-hover-solid": "#242222",
-    "--dsw-alias-markdown-code-block": "#101011",
-    "--dsw-alias-markdown-code-block-banner": "#1a1919",
-    "--dsw-alias-markdown-inline-code": "#2a2421",
+    "--dsw-alias-state-warn-secondary": "#f5c96a",
+    "--dsw-alias-state-business-primary": p.accentHot,
+    "--dsw-alias-state-business-tertiary": alpha(p.green, 14),
+    "--dsw-alias-interactive-bg-hover": "#ff8a8a12",
+    "--dsw-alias-interactive-bg-active": "#ff8a8a21",
+    "--dsw-alias-interactive-bg-hover-solid": "#251c1e",
+    "--dsw-alias-markdown-code-block": "#0e0b0c",
+    "--dsw-alias-markdown-code-block-banner": "#171214",
+    "--dsw-alias-markdown-inline-code": alpha(p.green, 11),
+    "--dsw-alias-scrollbar-bg-l2": alpha(p.accent, 30),
+    "--dsw-alias-scrollbar-hover-l2": alpha(p.accent, 55),
     "--dsw-alias-switch-thumb": p.muted,
-    "--dsw-alias-toast-bg": "#2a2321",
+    "--dsw-alias-toast-bg": "#2a1c1f",
+    "--dsw-focus-ring-color": p.green,
     "--dsw-specific-sidebar-fill": p.sidebar,
     "--dsw-specific-sidebar-nav-item-active": p.redDeep,
-    "--dsw-specific-sidebar-nav-item-hover": "#221517",
-    "--dsw-specific-sidebar-nav-item-active-accent": p.accent,
-    "--dsw-specific-input-major": "#141415",
-    "--dsw-specific-menu": "#1a1817f5",
-    "--dsw-specific-bubble": "#221c1a",
-    "--dsw-specific-tip": "#2a2321",
+    "--dsw-specific-sidebar-nav-item-hover": "#24141a",
+    "--dsw-specific-sidebar-nav-item-active-accent": p.accentHot,
+    "--dsw-specific-input-major": "#141012",
+    "--dsw-specific-menu": "#1a1315f5",
+    "--dsw-specific-bubble": "#2a1216",
+    "--dsw-specific-tip": "#2a1c1f",
     "--dsw-radius-xs": "0px",
     "--dsw-radius-sm": "2px",
     "--dsw-radius-md": "2px",
@@ -91,8 +97,16 @@ export function themeTokens(unit = DEFAULT_UNIT) {
     "--dsw-radius-xl": "4px",
     "--dsw-radius-panel": "4px",
     "--eva-accent": p.accent,
+    "--eva-accent-hot": p.accentHot,
     "--eva-red": p.red,
+    "--eva-red-deep": p.redDeep,
+    "--eva-green": p.green,
+    "--eva-green-hot": p.greenHot,
+    "--eva-green-dim": p.greenDim,
+    "--eva-green-deep": p.greenDeep,
+    "--eva-orange": p.orange,
     "--eva-warn": p.warn,
+    "--eva-text": p.text,
     "--eva-font-mincho": '"EVA Mincho", "Noto Serif CJK JP", "Hiragino Mincho ProN", "Songti SC", serif',
     "--eva-font-condensed": '"EVA Condensed", "Barlow Condensed", "DIN Condensed", "Arial Narrow", sans-serif',
   };
@@ -106,42 +120,130 @@ export function fontFaceCss() {
 `;
 }
 
-/** Everyday skin: only active while body[data-eva-theme] is set. Chat and code stay untouched. */
+/** Exact hashed-class token match ("_name" as a whole class token), version-hash agnostic. */
+const tok = (name) => `:is([class*="_${name} "],[class$="_${name}"])`;
+
+/** Corner-bracket background layers (green L marks) for framed surfaces. */
+const corners = (c, len = 9, w = 1) =>
+  ["top left", "top right", "bottom left", "bottom right"]
+    .flatMap((pos) => [
+      `linear-gradient(${c},${c}) ${pos}/${len}px ${w}px no-repeat`,
+      `linear-gradient(${c},${c}) ${pos}/${w}px ${len}px no-repeat`,
+    ])
+    .join(",");
+
+/**
+ * Everyday skin, active only while body[data-eva-theme] is set.
+ * Unit-02 language: crimson armour for identity and actions, eye-green
+ * phosphor for "system alive" signals. Reading surfaces stay calm.
+ */
 export function skinCss(unit = DEFAULT_UNIT) {
+  const B = "body[data-eva-theme]";
+  const R = "var(--eva-accent)";
+  const RH = "var(--eva-accent-hot)";
+  const G = "var(--eva-green)";
+  const md = `${B} [class*="_markdown_"]`;
   return `
-body[data-eva-theme] [class*="_sidebarCol"]{
+/* ── sidebar: crimson armour plate ── */
+${B} [class*="_sidebarCol"]{
   background:
-    linear-gradient(165deg, #51161ce6 0, #241215cc 170px, #10111300 350px),
+    linear-gradient(165deg, #6a141ce8 0, #33101599 190px, #0f0a0c00 400px),
+    repeating-linear-gradient(0deg, #ffffff05 0 1px, transparent 1px 3px),
     var(--dsw-specific-sidebar-fill) !important;
-  border-right:.5px solid #3c3029 !important;
+  border-right:1px solid #3a1418 !important;
+  box-shadow:inset -1px 0 0 #3fe08a14;
 }
-body[data-eva-theme] [data-phase]:has(> [data-slot="conversation.header"])::before{
+${B} ${tok("newSession")}:not([class*="_collapsed"] *){
+  background:linear-gradient(90deg,#d8262e2e,#d8262e12) !important;
+  border:1px solid #d8262e66 !important;
+  clip-path:polygon(0 0,calc(100% - 8px) 0,100% 8px,100% 100%,8px 100%,0 calc(100% - 8px));
+}
+${B} ${tok("newSession")}:not([class*="_collapsed"] *):hover{background:linear-gradient(90deg,#d8262e55,#d8262e22) !important;border-color:${RH} !important}
+${B} ${tok("sessionRow")}${tok("selected")},
+${B} ${tok("panelRow")}${tok("panelActive")}{
+  background:linear-gradient(90deg,#d8262e38,#d8262e0a 70%) !important;
+  box-shadow:inset 2px 0 0 ${RH};
+}
+${B} ${tok("sessionRow")}:hover:not(${tok("selected")}){background:#ff6a6a10 !important}
+${B} [class*="_sidebarCol"] [aria-current="page"],
+${B} [class*="_sidebarCol"] [data-active="true"]{box-shadow:inset 2px 0 0 ${RH}}
+
+/* ── brand seat: the shipped brand entry outranks installed packages, so swap it in CSS ── */
+${B} [class*="_brandMark"] > [data-slot="sidebar.brand.mark"] > *,
+${B} [class*="_railMark"] > [data-slot="sidebar.brand.mark"] > *,
+${B} [class*="_brandName"] > [data-slot="sidebar.brand.name"] > *{display:none!important}
+${B} [class*="_brandMark"]:has(> [data-slot="sidebar.brand.mark"])::before,
+${B} [class*="_railMark"]:has(> [data-slot="sidebar.brand.mark"])::before{
+  content:"";display:block;width:24px;height:24px;background:${svgUrl(markSvg)} center/contain no-repeat;
+  filter:drop-shadow(0 0 6px #d8262e66)}
+${B} [class*="_brandName"]:has(> [data-slot="sidebar.brand.name"])::before{
+  content:"${unit.kanji}";font-family:"EVA Mincho",serif;font-weight:900;font-size:19px;letter-spacing:.02em;
+  display:inline-block;transform:scaleX(.86);transform-origin:left center;margin-right:-6px;color:var(--eva-text,#ece4da)}
+${B} [class*="_brandName"]:has(> [data-slot="sidebar.brand.name"])::after{
+  content:"UNIT-${unit.id} · DSH";font-family:"EVA Condensed",sans-serif;font-weight:600;font-size:11px;
+  letter-spacing:.16em;color:${G};align-self:flex-end;line-height:18px;text-shadow:0 0 8px #3fe08a55}
+
+/* ── conversation backdrop + header ── */
+${B} [data-phase]:has(> [data-slot="conversation.header"])::before{
   content:"";position:absolute;inset:0;z-index:0;pointer-events:none;
   background:
     ${svgUrl(backdropRight)} right -24px top 52px / auto calc(100% - 72px) no-repeat,
-    ${svgUrl(backdropLeft)} left 18px bottom 96px / 250px auto no-repeat;
+    ${svgUrl(backdropLeft)} left 18px bottom 96px / 210px auto no-repeat,
+    radial-gradient(120% 70% at 100% 0, #d8262e0d, transparent 60%),
+    radial-gradient(80% 50% at 0 100%, #3fe08a08, transparent 60%);
 }
-body[data-eva-theme] [data-phase]:has(> [data-slot="conversation.header"]) > [data-slot="conversation.header"] > *{position:relative;z-index:1}
-@media (max-width:980px){body[data-eva-theme] [data-phase]:has(> [data-slot="conversation.header"])::before{background-size:auto calc(100% - 72px),0 0;opacity:.6}}
-/* brand seat: the shipped brand entry outranks installed packages, so swap it in CSS */
-body[data-eva-theme] [class*="_brandMark"] > [data-slot="sidebar.brand.mark"] > *,
-body[data-eva-theme] [class*="_railMark"] > [data-slot="sidebar.brand.mark"] > *,
-body[data-eva-theme] [class*="_brandName"] > [data-slot="sidebar.brand.name"] > *{display:none!important}
-body[data-eva-theme] [class*="_brandMark"]:has(> [data-slot="sidebar.brand.mark"])::before,
-body[data-eva-theme] [class*="_railMark"]:has(> [data-slot="sidebar.brand.mark"])::before{
-  content:"";display:block;width:24px;height:24px;background:${svgUrl(markSvg)} center/contain no-repeat}
-body[data-eva-theme] [class*="_brandName"]:has(> [data-slot="sidebar.brand.name"])::before{
-  content:"${unit.kanji}";font-family:"EVA Mincho",serif;font-weight:900;font-size:19px;letter-spacing:.02em;
-  display:inline-block;transform:scaleX(.86);transform-origin:left center;margin-right:-6px;color:var(--eva-text,#e8e2d7)}
-body[data-eva-theme] [class*="_brandName"]:has(> [data-slot="sidebar.brand.name"])::after{
-  content:"UNIT-${unit.id} · DSH";font-family:"EVA Condensed",sans-serif;font-weight:600;font-size:11px;
-  letter-spacing:.16em;color:var(--eva-accent,#f06a22);align-self:flex-end;line-height:18px}
-body[data-eva-theme] ::selection{background:color-mix(in srgb,#f06a22 40%,transparent)}
-body[data-eva-theme] :focus-visible{outline-color:#f06a22}
-body[data-eva-theme] [class*="_sidebarCol"] [aria-current="page"],
-body[data-eva-theme] [class*="_sidebarCol"] [data-active="true"]{
-  box-shadow:inset 3px 0 0 #f06a22;
+${B} [data-phase]:has(> [data-slot="conversation.header"]) > [data-slot="conversation.header"] > *{position:relative;z-index:1}
+${B} [data-phase]:has(> [data-slot="conversation.header"]) > [data-slot="conversation.header"] > *::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:1px;pointer-events:none;
+  background:linear-gradient(90deg,#d8262e 0,#d8262e66 22%,transparent 48%,transparent 62%,#3fe08a55 85%,#3fe08a 100%);opacity:.55}
+${B} ${tok("crumbCurrent")}{letter-spacing:.02em}
+${B} ${tok("tabActive")}{color:${RH} !important;text-shadow:0 0 10px #f0413c44}
+@media (max-width:1280px){${B} [data-phase]:has(> [data-slot="conversation.header"])::before{background-size:auto calc(100% - 72px),0 0,auto,auto;opacity:.6}}
+
+/* ── user bubble: crimson entry-plug plate ── */
+${B} ${tok("userRow")} ${tok("bubble")}{
+  background:linear-gradient(135deg,#3a1219 0,#25101400 70%),var(--dsw-specific-bubble) !important;
+  border-left:2px solid ${R};
+  border-radius:0 !important;
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 10px,100% 100%,0 100%);
+  box-shadow:inset 0 1px 0 #ff6a6a1f;
 }
+
+/* ── markdown: NERV briefing typography ── */
+${md} :where(h1,h2){position:relative;padding:0 0 6px 12px;
+  background:linear-gradient(90deg,#d8262e99,#d8262e00 60%) left bottom/100% 1px no-repeat}
+${md} :where(h1,h2)::before{content:"";position:absolute;left:0;top:.18em;bottom:calc(6px + .18em);width:3px;background:${R}}
+${md} h3{position:relative;padding-left:14px}
+${md} h3::before{content:"";position:absolute;left:0;top:50%;width:7px;height:7px;margin-top:-3.5px;background:${G};
+  clip-path:polygon(50% 0,100% 50%,50% 100%,0 50%);box-shadow:0 0 6px #3fe08a}
+${md} h4{color:${G}}
+${md} li::marker{color:${RH}}
+${md} strong{color:#fff2ea}
+${md} a{color:${G} !important}
+${md} blockquote{border-left:2px solid ${G} !important;background:linear-gradient(90deg,#3fe08a12,transparent 70%);padding:6px 0 6px 14px !important}
+${md} hr{background:linear-gradient(90deg,#d8262e,#d8262e33 40%,#3fe08a33 60%,#3fe08a) !important;height:1px !important;opacity:.6}
+${md} :not(pre)>code{color:var(--eva-green-hot) !important;border:.5px solid #3fe08a33}
+${md} [class*="_tableScroll_"] th{color:${G};letter-spacing:.06em;border-bottom:1px solid #d8262e88 !important}
+${md} [class*="_tableScroll_"] tr:hover td{background:#ff6a6a08}
+
+/* ── code blocks: dark terminal with a crimson rail ── */
+${B} .md-code-block{border-radius:0 !important;box-shadow:inset 2px 0 0 #d8262eaa, inset 0 0 0 .5px #ff6a6a1f !important}
+${B} .md-code-block [data-code-block-banner]{font-family:"EVA Condensed",var(--ds-font-family-code),sans-serif;letter-spacing:.12em;color:${G};text-transform:uppercase}
+
+/* ── composer: framed control panel ── */
+${B} [data-composer-card]{
+  background:${corners("#3fe08a99")},var(--dsw-specific-input-major) !important;
+  box-shadow:inset 0 2px 0 -0px #d8262ecc, 0 0 0 .5px #ff6a6a2e, 0 12px 40px -18px #d8262e55 !important;
+  border-radius:0 !important;
+}
+${B} [data-composer-card]:focus-within{
+  box-shadow:inset 0 2px 0 0 #f0413c, 0 0 0 .5px #3fe08a77, 0 0 22px -6px #3fe08a44 !important}
+
+/* ── system details ── */
+${B} ::selection{background:#d8262e66;color:#fff}
+${B} :focus-visible{outline-color:${G}}
+${B} ::-webkit-scrollbar-thumb{background-color:#d8262e4d}
+${B} ::-webkit-scrollbar-thumb:hover{background-color:#d8262e88}
 `;
 }
 
