@@ -64,6 +64,7 @@
   },
   "scripts": {
     "build": "node scripts/build.mjs",
+    "test": "node --test tests/*.test.mjs",
     "fonts": "python3 scripts/subset-fonts.py",
     "voice": "node scripts/gen-voice.mjs"
   },
@@ -72,6 +73,9 @@
   },
   "devDependencies": {
     "esbuild": "^0.25.0",
+    "happy-dom": "^21.0.4",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
     "three": "^0.170.0"
   }
 }

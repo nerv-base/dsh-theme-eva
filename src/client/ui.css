@@ -54,14 +54,17 @@
 @keyframes eva-blink{0%{opacity:1}50%{opacity:.25}}
 @container (max-width:520px){.eva-sync-bar,.eva-sync-alert{display:none}}
 
-/* ── running edge hint: rides on the composer card's top edge ── */
-.eva-edge{position:relative;height:0;margin-bottom:calc(-1 * var(--dsh-composer-stack-gap,6px));width:100%;max-width:var(--dsh-composer-card-max-width);align-self:center;pointer-events:none;z-index:2}
-.eva-edge-line{position:absolute;left:18px;right:18px;top:var(--dsh-composer-stack-gap,6px);height:1px;background:linear-gradient(90deg,#f06a2200,#f06a22 22%,#ff8a3d 50%,#f06a22 78%,#f06a2200);opacity:.35;animation:eva-breathe 2.8s ease-in-out infinite}
-.eva-edge-clock{position:absolute;right:20px;bottom:2px;display:inline-flex;align-items:baseline;gap:6px;font-family:"EVA Condensed",var(--eva-font-condensed),sans-serif;font-variant-numeric:tabular-nums;font-weight:600;font-size:11.5px;letter-spacing:.06em;color:#e2453acc}
-.eva-edge-clock b{font-family:"EVA Mincho",var(--eva-font-mincho),serif;font-weight:900;font-size:10.5px;letter-spacing:.08em}
-.eva-edge-clock small{font-size:9.5px;opacity:.75}
+/* ── native running status: replace its visuals, never its React-owned state ── */
+[data-chat-running][data-eva-running]>:not([data-eva-running-status]):not([role="status"]){display:none!important}
+[data-chat-running][data-eva-running]{color:#e2453a}
+.eva-running-power{display:flex;align-items:center;gap:10px;width:100%;min-width:0;min-height:28px;pointer-events:none;color:#e2453a}
+.eva-running-power b{flex:none;font-family:"EVA Mincho",var(--eva-font-mincho),serif;font-weight:900;font-size:12px;letter-spacing:.12em;white-space:nowrap}
+.eva-power-clock{flex:none;font-family:"EVA Condensed",var(--eva-font-condensed),sans-serif;font-variant-numeric:tabular-nums;font-weight:600;font-size:16px;letter-spacing:.06em;white-space:nowrap}
+.eva-power-clock small{font-size:11px;opacity:.75}
+.eva-power-line{flex:1;height:1px;max-width:220px;min-width:12px;background:linear-gradient(90deg,#f06a22,#ff8a3d88 50%,#f06a2200);opacity:.35;animation:eva-breathe 2.8s ease-in-out infinite}
 @keyframes eva-breathe{0%,100%{opacity:.18}50%{opacity:.75}}
-@media (prefers-reduced-motion:reduce){.eva-edge-line{animation:none;opacity:.5}}
+@media (prefers-reduced-motion:reduce){.eva-power-line{animation:none;opacity:.5}}
+@media (forced-colors:active){[data-chat-running][data-eva-running],.eva-running-power{color:CanvasText}.eva-power-line{background:CanvasText;animation:none;opacity:1}}
 
 /* ── cinematic host / static card ── */
 .eva-cinema-host{position:fixed;inset:0;z-index:2147483600;background:#000;color:#e8e2d7}

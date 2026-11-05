@@ -2,6 +2,7 @@
 import React from "react";
 import { DEFAULT_UNIT } from "../shared/units.js";
 import { runtime, useStore, requestPlay } from "./store.js";
+import { attachRunningStatus, turnStartTime } from "./running-status.js";
 
 const unit = DEFAULT_UNIT;
 
@@ -171,37 +172,6 @@ export function makeFooterReplay(prefs) {
 
 /* ───────────── sync meter ───────────── */
 
-function useTurnClock(running) {
-  const [elapsed, setElapsed] = React.useState(0);
-  const startRef = React.useRef(0);
-  React.useEffect(() => {
-    if (!running) return undefined;
-    startRef.current = performance.now();
-    setElapsed(0);
-    let raf = 0;
-    let last = 0;
-    const tick = (now) => {
-      if (now - last > 40) {
-        last = now;
-        setElapsed(now - startRef.current);
-      }
-      raf = requestAnimationFrame(tick);
-    };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [running]);
-  return elapsed;
-}
-
-function clock(ms) {
-  const total = Math.max(0, Math.floor(ms / 10));
-  const cs = total % 100;
-  const s = Math.floor(total / 100) % 60;
-  const m = Math.floor(total / 6000);
-  const pad = (n, w = 2) => String(n).padStart(w, "0");
-  return { main: `${pad(m)}:${pad(s)}`, cs: pad(cs) };
-}
-
 function syncState(pressure) {
   const used = pressure?.projectedTokens ?? pressure?.pressureTokens;
   const windowTokens = pressure?.contextWindow;
@@ -249,27 +219,28 @@ export function makeSyncMeter(prefs) {
   };
 }
 
-/* ───────────── running edge hint (above the composer card) ───────────── */
+/* ───────────── native running status (at the transcript tail) ───────────── */
 
-export function makeEdgeHint(prefs) {
-  return function EvaEdgeHint({ t, useSession }) {
+export function makeRunningIndicator(prefs) {
+  return function EvaRunningIndicator({ t, useSession, useChat }) {
     const allowed = useStore(prefs.store, (s) => s.enabled && s.scanBeam);
     const running = useSession ? useSession((s) => s?.running === true) : false;
+    const startTime = useChat ? useChat(turnStartTime) : undefined;
     const playing = useStore(runtime, (s) => s.playing);
-    const elapsed = useTurnClock(Boolean(running && allowed));
-    if (!allowed || !running || playing) return null;
-    const c = clock(elapsed);
-    return (
-      <div className="eva-edge" aria-hidden="true">
-        <span className="eva-edge-clock" title={t("meter.internal")}>
-          <b>内部電源</b>
-          <span>
-            {c.main}
-            <small>:{c.cs}</small>
-          </span>
-        </span>
-        <span className="eva-edge-line" />
-      </div>
-    );
+    const anchor = React.useRef(null);
+    const adapter = React.useRef(null);
+    const title = t("meter.internal");
+    React.useEffect(() => {
+      if (!allowed || !running || playing) return undefined;
+      // A hidden dock occupant supplies Session hooks and the owning occurrence;
+      // it does not add an indicator or spacing above the composer anymore.
+      const root = anchor.current?.closest("[data-conversation-content]");
+      if (!root) return undefined; // unknown host layout: leave native UI intact
+      const current = attachRunningStatus(root, { startTime, title });
+      adapter.current = current;
+      return () => { current.dispose(); adapter.current = null; };
+    }, [allowed, running, playing]);
+    React.useEffect(() => { adapter.current?.update({ startTime, title }); }, [startTime, title]);
+    return <span ref={anchor} hidden data-eva-running-bridge="" />;
   };
 }

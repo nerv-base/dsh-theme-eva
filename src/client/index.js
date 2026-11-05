@@ -9,7 +9,7 @@ import {
   makeSettingsRow,
   makeFooterReplay,
   makeSyncMeter,
-  makeEdgeHint,
+  makeRunningIndicator,
 } from "./components.jsx";
 import { makeCinemaOverlay } from "./cinemaHost.jsx";
 
@@ -52,7 +52,7 @@ export function apply(ctx) {
   ctx.slots.inject("conversation.input.dock", () =>
     ctx.slots.register(
       { name: "conversation.input.dock", id: "theme-eva-edge", order: 1000, locale: LOCALE_NS },
-      makeEdgeHint(prefs),
+      makeRunningIndicator(prefs),
     ),
   );
   ctx.slots.inject("shell.overlay", function* () {
