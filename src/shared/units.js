@@ -1,0 +1,53 @@
+// Per-unit configuration. Only Unit-02 ships today; every unit-specific value
+// (palette, numbering, pilot callsign, cinematic copy) lives here so a new unit
+// is one more entry, not a code change.
+
+export const UNITS = {
+  "02": {
+    id: "02",
+    themeId: "eva-02",
+    kanji: "弐号機",
+    kanjiNumber: "弐",
+    nameEn: "EVANGELION UNIT-02",
+    designation: "PRODUCTION MODEL",
+    pilotRole: "SECOND CHILDREN",
+    palette: {
+      bg: "#0b0b0c",
+      panel: "#121315",
+      raised: "#1b1b1c",
+      raised2: "#232122",
+      border: "#33312e",
+      borderStrong: "#4a4440",
+      text: "#e8e2d7",
+      textDim: "#c9c2b6",
+      muted: "#a29e97",
+      faint: "#6f6b66",
+      accent: "#f06a22",
+      accentHot: "#ff8a3d",
+      red: "#b62026",
+      redHot: "#d34634",
+      redDeep: "#51161c",
+      warn: "#e7bc35",
+      ok: "#58c46a",
+      lcl: "#ff7a1a",
+      sidebar: "#101113",
+    },
+    // Cinematic script: t = seconds from the moment the pilot passes the start gate.
+    script: [
+      { t: 0.6, ja: "エントリープラグ、挿入", en: "ENTRY PLUG INSERTION", voice: true },
+      { t: 4.4, ja: "プラグ固定、第一次接続開始", en: "PLUG LOCKED — PRIMARY CONTACT", voice: true },
+      { t: 8.4, ja: "LCL 注水", en: "LCL INJECTION", voice: true },
+      { t: 11.6, ja: "LCL 電化", en: "ELECTRIFYING LCL", voice: true },
+      { t: 14.4, ja: "主電源接続、全回路動力伝達", en: "MAIN POWER CONNECTED — ALL CIRCUITS LIVE", voice: true },
+      { t: 17.4, ja: "A10 神経接続、異常なし", en: "A10 NERVE CONNECTION — NOMINAL", voice: true },
+      { t: 20.4, ja: "シンクロ開始", en: "SYNCHRONIZATION START", voice: true },
+    ],
+    confirm: { ja: "セカンドチルドレン、搭乗確認", en: "SECOND CHILDREN — CONFIRM BOARDING", voice: "セカンドチルドレン、搭乗を確認してください" },
+    final: { ja: "シンクロ率 100%、ハーモニクス正常", en: "SYNC RATIO 100% — HARMONICS NORMAL", voice: "シンクロ率、百パーセント。ハーモニクス、すべて正常" },
+    title: { ja: "弐号機 起動", en: "EVANGELION UNIT-02 · ACTIVATED", voice: "エヴァンゲリオン弐号機、起動" },
+    gate: { ja: "接続待機", en: "ENTRY PLUG — STANDBY" },
+    syncStop: 99.2,
+  },
+};
+
+export const DEFAULT_UNIT = UNITS["02"];

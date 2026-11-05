@@ -1,0 +1,5 @@
+# dsh-theme-eva: mounts the Host half (preferences + font route) and the public
+# dsh.client entry. The row id is the settings namespace read by the client.
+- insert:
+    - id: theme-eva
+      name: 'dsh-theme-eva'
