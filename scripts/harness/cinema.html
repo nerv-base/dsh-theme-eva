@@ -14,13 +14,21 @@ html, body { margin: 0; height: 100%; background: #111; }
 <div id="host"></div>
 <script>
 window.__evaDone = false;
+let voiceChunk;
+const loadVoiceChunk = () => voiceChunk ??= new Promise((resolve) => {
+  window.__voiceResolve = resolve;
+  const s = document.createElement("script");
+  s.src = "/lib/client.voice.js";
+  document.body.appendChild(s);
+});
 window.__ModuleLoader__ = {
-  load({ factory }) {
+  load({ chunk, factory }) {
+    if (chunk === "client.voice.js") return window.__voiceResolve(factory(() => {}));
     const mod = factory((id) => { throw new Error("no module " + id); });
     window.__evaInstance = mod.mount(document.getElementById("host"), {
       unit: window.__evaUnit,
       voice: true,
-      voiceBase: "/assets/voice",
+      voiceClips: () => loadVoiceChunk().then((m) => m.clips),
       strings: { gateHint: "点击或按任意键接入", skip: "跳过", skipHint: "Esc 跳过", confirm: "确认搭乘" },
       onDone() { window.__evaDone = true; },
     });

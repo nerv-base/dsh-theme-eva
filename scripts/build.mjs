@@ -1,8 +1,9 @@
 // Builds the Client half into the DSH browser module format:
 //   lib/client.js         main module (React from the platform module table)
 //   lib/client.cinema.js  lazy chunk with three.js + the boot cinematic
+//   lib/client.voice.js   lazy chunk with the announcer clips (assets/voice/*.mp3, base64)
 import { build } from "esbuild";
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, readdir, writeFile, mkdir } from "node:fs/promises";
 
 const pkg = JSON.parse(await readFile(new URL("../package.json", import.meta.url), "utf8"));
 const ID = pkg.name;
@@ -57,8 +58,15 @@ async function run() {
   const cinemaCode = cinema.outputFiles[0].text;
   await writeFile(new URL("../lib/client.js", import.meta.url), wrapMain(mainCode));
   await writeFile(new URL("../lib/client.cinema.js", import.meta.url), wrapChunk("client.cinema.js", cinemaCode));
+  const voiceDir = new URL("../assets/voice/", import.meta.url);
+  const clips = {};
+  for (const file of (await readdir(voiceDir).catch(() => [])).filter((f) => f.endsWith(".mp3")).sort()) {
+    clips[file] = (await readFile(new URL(file, voiceDir))).toString("base64");
+  }
+  const voiceCode = `module.exports = { clips: ${JSON.stringify(clips)} };`;
+  await writeFile(new URL("../lib/client.voice.js", import.meta.url), wrapChunk("client.voice.js", voiceCode));
   const kb = (s) => `${(Buffer.byteLength(s) / 1024).toFixed(1)} KiB`;
-  console.log(`lib/client.js ${kb(mainCode)} · lib/client.cinema.js ${kb(cinemaCode)}`);
+  console.log(`lib/client.js ${kb(mainCode)} · lib/client.cinema.js ${kb(cinemaCode)} · lib/client.voice.js ${kb(voiceCode)} (${Object.keys(clips).length} clips)`);
 }
 
 await run();

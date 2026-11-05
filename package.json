@@ -27,7 +27,7 @@
     "assets/icon.svg",
     "assets/fonts/*.woff2",
     "assets/fonts/*.txt",
-    "assets/voice/*.mp3",
+    "lib/client.voice.js",
     "assets/voice/VOICE-NOTES.json",
     "locale/*.json",
     "cordis.patch.yml",

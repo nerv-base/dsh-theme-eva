@@ -40,7 +40,7 @@ function syncAt(t, confirmedAt) {
   return 99.2 + 0.8 * clamp((t - FINAL_AT) / 0.9);
 }
 
-export function mount(container, { unit, voice = true, voiceBase, strings = {}, onDone }) {
+export function mount(container, { unit, voice = true, voiceClips, strings = {}, onDone }) {
   const style = document.createElement("style");
   style.dataset.evaCinema = "";
   style.textContent = hudCss;
@@ -166,7 +166,7 @@ export function mount(container, { unit, voice = true, voiceBase, strings = {}, 
 
   let audio;
   let announcer;
-  const voices = voice ? new VoicePlayer(voiceBase, voiceLines(unit).map((l) => voiceFile(unit, l))) : undefined;
+  const voices = voice ? new VoicePlayer(voiceClips, voiceLines(unit).map((l) => voiceFile(unit, l))) : undefined;
   let started = false;
   let startWall = 0;
   let confirmedAt = null; // wall-clock ms when the pilot confirmed

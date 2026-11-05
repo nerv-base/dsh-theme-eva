@@ -425,21 +425,31 @@ export class Announcer {
 // AudioContext the start gate creates. Lines never overlap: a clip that comes
 // due while another is still speaking is queued right after it.
 export class VoicePlayer {
-  constructor(base, files) {
+  // source: async () => ({ [file]: base64 }) (the bundled voice chunk), or a
+  // base URL the files are fetched from (standalone harness).
+  constructor(source, files) {
     this.raw = new Map();
     this.buffers = new Map();
     this.pending = new Map();
     this.busyUntil = 0;
     this.sources = new Set();
-    this.failed = !base || typeof fetch !== "function";
+    this.failed = !source;
     if (this.failed) return;
-    this.fetching = Promise.all(
-      files.map(async (file) => {
-        const res = await fetch(`${base.replace(/\/$/, "")}/${file}`);
-        if (!res.ok) throw new Error(`voice ${file}: ${res.status}`);
-        this.raw.set(file, await res.arrayBuffer());
-      }),
-    ).catch(() => {
+    const load = typeof source === "function"
+      ? source().then((clips) => {
+          for (const file of files) {
+            if (!clips?.[file]) throw new Error(`voice ${file}: missing`);
+            this.raw.set(file, base64ToBuffer(clips[file]));
+          }
+        })
+      : Promise.all(
+          files.map(async (file) => {
+            const res = await fetch(`${source.replace(/\/$/, "")}/${file}`);
+            if (!res.ok) throw new Error(`voice ${file}: ${res.status}`);
+            this.raw.set(file, await res.arrayBuffer());
+          }),
+        );
+    this.fetching = load.catch(() => {
       this.failed = true;
     });
   }
@@ -532,6 +542,13 @@ export class VoicePlayer {
     this.sources.clear();
     this.busyUntil = c ? c.currentTime + fade : 0;
   }
+}
+
+function base64ToBuffer(b64) {
+  const bin = atob(b64);
+  const out = new Uint8Array(bin.length);
+  for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+  return out.buffer;
 }
 
 // Drop the leading/trailing silence TTS engines pad clips with (keeps 30 ms).
