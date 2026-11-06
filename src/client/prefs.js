@@ -2,10 +2,12 @@
 // patch row id), mirrored through ctx.configForms. A localStorage hint only
 // removes the first-paint flash; the Host value always wins once it loads.
 import { createStore } from "./store.js";
+import { DEFAULT_UNIT_ID, UNIT_IDS } from "../shared/units.js";
 
 export const NAMESPACE = "theme-eva";
 export const DEFAULTS = Object.freeze({
   enabled: true,
+  unit: DEFAULT_UNIT_ID,
   cinematic: true,
   voice: true,
   scanBeam: true,
@@ -35,7 +37,10 @@ function writeHint(values) {
 function pick(source) {
   const out = { ...DEFAULTS };
   if (source && typeof source === "object") {
-    for (const key of Object.keys(DEFAULTS)) if (typeof source[key] === "boolean") out[key] = source[key];
+    for (const key of Object.keys(DEFAULTS)) {
+      if (typeof DEFAULTS[key] === "boolean" && typeof source[key] === "boolean") out[key] = source[key];
+    }
+    if (UNIT_IDS.includes(source.unit)) out.unit = source.unit;
   }
   return out;
 }

@@ -42,6 +42,7 @@ import {
 } from "three";
 import { mergeVertices } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import { scopeAt } from "./monitor.js";
+import { toner } from "./tone.js";
 
 const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const smooth = (a, b, t) => {
@@ -92,9 +93,9 @@ function canvasTex(w, h, draw, wrap = false) {
 const COND = "'EVA Condensed','Barlow Condensed','Arial Narrow',sans-serif";
 
 // Plug skin: u runs around the hull, v runs nose (0) → rear (1).
-function plugSkin(unit, vOf) {
+function plugSkin(unit, tone, vOf) {
   return canvasTex(2048, 1024, (g, W, H) => {
-    const red = unit.palette.red;
+    const red = unit.palette.armor;
     g.fillStyle = "#ffffff";
     g.fillRect(0, 0, W, H);
     const y = (z) => vOf(z) * H;
@@ -123,7 +124,7 @@ function plugSkin(unit, vOf) {
       g.fillStyle = "#20140f";
       for (let k = 0; k < 4; k++) g.fillRect(x + 12 + k * 36, y(z1) - 18, 18, 6);
     }
-    g.fillStyle = "#3a302b";
+    g.fillStyle = tone("#3a302b", "accent");
     for (const u of [0.12, 0.62]) for (let k = 0; k < 7; k++) g.fillRect(u * W, y(0.85) + k * 16, 110, 7);
     g.textBaseline = "middle";
     g.font = `800 120px ${COND}`;
@@ -169,7 +170,7 @@ function decalTexture(unit) {
       g.arc(256 + Math.cos(a) * 208, 256 + Math.sin(a) * 208, 9, 0, Math.PI * 2);
       g.fill();
     }
-    g.fillStyle = unit.palette.red;
+    g.fillStyle = unit.palette.armor;
     g.font = `900 210px ${COND}`;
     g.textAlign = "center";
     g.textBaseline = "middle";
@@ -177,17 +178,18 @@ function decalTexture(unit) {
   });
 }
 
-function armorSkin(unit) {
+function armorSkin(unit, tone) {
+  const line = tone("#2a0c0e", "accent");
   return canvasTex(
     1024,
     1024,
     (g, W, H) => {
       g.fillStyle = "#ffffff";
       g.fillRect(0, 0, W, H);
-      g.strokeStyle = "#2a0c0e";
+      g.strokeStyle = line;
       g.lineWidth = 5;
       for (const [x, y, w, h] of [[60, 80, 380, 260], [520, 60, 440, 200], [80, 420, 300, 480], [460, 330, 500, 300], [470, 700, 480, 250]]) g.strokeRect(x, y, w, h);
-      g.fillStyle = "#2a0c0e";
+      g.fillStyle = line;
       for (let i = 0; i < 40; i++) g.fillRect(70 + (i % 10) * 34, 360 + Math.floor(i / 10) * 14, 10, 6);
       g.font = `700 40px ${COND}`;
       g.fillStyle = "#e8dcd0";
@@ -199,14 +201,15 @@ function armorSkin(unit) {
   );
 }
 
-function consoleScreen(unit) {
+function consoleScreen(unit, tone) {
+  const phosphor = tone("#ff7a1a"); // same marking phosphor as the monitor cuts
   return canvasTex(512, 256, (g, W, H) => {
     g.fillStyle = "#050806";
     g.fillRect(0, 0, W, H);
-    g.strokeStyle = "#ff7a1a";
+    g.strokeStyle = phosphor;
     g.lineWidth = 2;
     g.strokeRect(6, 6, W - 12, H - 12);
-    g.fillStyle = "#ff7a1a";
+    g.fillStyle = phosphor;
     g.font = `700 26px ${COND}`;
     g.fillText(`EVA-${unit.id}  SYNC MONITOR`, 20, 40);
     for (let i = 0; i < 12; i++) {
@@ -583,7 +586,10 @@ export function createScene(canvas, unit) {
   const renderer = new WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: "high-performance" });
   renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
   renderer.outputColorSpace = SRGBColorSpace;
+  // Unit colours: palette roles for the armour, markings and glows; the other
+  // warm shades (ink, panel lines, shadows) re-hued from Unit-02 (tone.js).
   const pal = unit.palette;
+  const tone = toner(unit);
   const res = new Vector2(1, 1);
   const owned = [];
   const keep = (x) => (owned.push(x), x);
@@ -596,8 +602,8 @@ export function createScene(canvas, unit) {
     uExposure: { value: 1 },
     uLevel: { value: -99 },
   });
-  const extWorld = makeWorld([0.55, 0.75, 0.55], "#0d0e14", [16, 50], "#ff9a52");
-  const cabWorld = makeWorld([0.2, 0.9, 0.5], "#050304", [3, 9], "#ff8a3d");
+  const extWorld = makeWorld([0.55, 0.75, 0.55], "#0d0e14", [16, 50], tone("#ff9a52"));
+  const cabWorld = makeWorld([0.2, 0.9, 0.5], "#050304", [3, 9], pal.markingHot);
 
   function toon(world, { color, shade = "#7c6f88", map, repeat = [1, 1], emissive = "#000000", rimK = 0.5 } = {}) {
     return keep(
@@ -621,12 +627,13 @@ export function createScene(canvas, unit) {
     );
   }
 
-  const inkUniforms = { uRes: { value: res }, uWidth: { value: 1.6 }, uInk: { value: rgb("#1a0d0b") } };
+  const ink = tone("#1a0d0b", "accent");
+  const inkUniforms = { uRes: { value: res }, uWidth: { value: 1.6 }, uInk: { value: rgb(ink) } };
   const inkMat = keep(new ShaderMaterial({ uniforms: inkUniforms, vertexShader: inkVert, fragmentShader: inkFrag, side: BackSide }));
   const inkThin = keep(
     new ShaderMaterial({ uniforms: { uRes: inkUniforms.uRes, uInk: inkUniforms.uInk, uWidth: { value: 1.0 } }, vertexShader: inkVert, fragmentShader: inkFrag, side: BackSide }),
   );
-  const creaseMat = keep(new LineBasicMaterial({ color: 0x1a0d0b }));
+  const creaseMat = keep(new LineBasicMaterial({ color: ink }));
 
   /** Mesh + ink: inverted-hull silhouette and crease lines on hard edges. */
   function inked(geo, mat, { hull = inkMat, crease = 32 } = {}) {
@@ -664,7 +671,7 @@ export function createScene(canvas, unit) {
   const ext = new Scene();
   const skyMat = keep(
     new ShaderMaterial({
-      uniforms: { uTop: { value: rgb("#1b2030") }, uBottom: { value: rgb("#08080b") }, uGlow: { value: rgb("#6a2a18") } },
+      uniforms: { uTop: { value: rgb("#1b2030") }, uBottom: { value: rgb("#08080b") }, uGlow: { value: rgb(tone("#6a2a18", "accent")) } },
       vertexShader: skyVert,
       fragmentShader: skyFrag,
       side: BackSide,
@@ -673,12 +680,12 @@ export function createScene(canvas, unit) {
   );
   ext.add(new Mesh(new SphereGeometry(70, 32, 16), skyMat));
 
-  const armorTex = keep(armorSkin(unit));
-  const armorMat = toon(extWorld, { color: pal.red, shade: "#5a2a44", map: armorTex, repeat: [0.22, 0.22], rimK: 0.35 });
-  const armorDark = toon(extWorld, { color: "#7a1820", shade: "#3a1a30", rimK: 0.25 });
+  const armorTex = keep(armorSkin(unit, tone));
+  const armorMat = toon(extWorld, { color: pal.armor, shade: tone("#5a2a44", "accent"), map: armorTex, repeat: [0.22, 0.22], rimK: 0.35 });
+  const armorDark = toon(extWorld, { color: tone("#7a1820", "accent"), shade: tone("#3a1a30", "accent"), rimK: 0.25 });
   const steel = toon(extWorld, { color: "#b9b3ab", shade: "#5c5868", rimK: 0.4 });
   const gunmetal = toon(extWorld, { color: "#3a3638", shade: "#1c1a24", rimK: 0.3 });
-  const orangeMat = toon(extWorld, { color: pal.accent, shade: "#8a3a2a", rimK: 0.2 });
+  const orangeMat = toon(extWorld, { color: pal.accent, shade: tone("#8a3a2a", "accent"), rimK: 0.2 });
   const black = keep(new MeshBasicMaterial({ color: 0x030303 }));
 
   const armor = new Group();
@@ -811,7 +818,7 @@ export function createScene(canvas, unit) {
   };
   const plugGeo = new LatheGeometry(profile, 64);
   plugGeo.rotateX(Math.PI / 2); // lathe axis y → world z (nose at −z)
-  const plugTex = keep(plugSkin(unit, vOf));
+  const plugTex = keep(plugSkin(unit, tone, vOf));
   const plugMat = toon(extWorld, { color: "#efe9df", shade: "#7d7690", map: plugTex, rimK: 0.55 });
   plug.add(inked(plugGeo, plugMat, { crease: 0 }));
   const decalTex = keep(decalTexture(unit));
@@ -856,10 +863,10 @@ export function createScene(canvas, unit) {
   cab.add(new Mesh(new CylinderGeometry(1.6, 1.6, 4.4, 96, 1, true), wallMat));
 
   const seatMat = toon(cabWorld, { color: "#4a4448", shade: "#1e1a26", rimK: 0.5 });
-  const seatPad = toon(cabWorld, { color: "#6e2228", shade: "#2a1020", rimK: 0.4 });
+  const seatPad = toon(cabWorld, { color: tone("#6e2228", "accent"), shade: tone("#2a1020", "accent"), rimK: 0.4 });
   const cabSteel = toon(cabWorld, { color: "#a29c96", shade: "#3c3848", rimK: 0.5 });
   const gripMat = toon(cabWorld, { color: "#2a2628", shade: "#121018", rimK: 0.6 });
-  const buttonMat = toon(cabWorld, { color: pal.red, shade: "#5a1020", emissive: "#2a0404", rimK: 0.3 });
+  const buttonMat = toon(cabWorld, { color: pal.armor, shade: pal.armorShade, emissive: tone("#2a0404", "accent"), rimK: 0.3 });
   const lampMats = [pal.accent, "#5cf2a0", pal.accent, "#e8261c"].map((c) => keep(new MeshBasicMaterial({ color: c })));
 
   const cockpit = new Group();
@@ -915,7 +922,7 @@ export function createScene(canvas, unit) {
     con.position.set(0, -0.98, -0.72);
     con.rotation.x = -0.9;
     cockpit.add(con);
-    const screenMat = keep(new MeshBasicMaterial({ map: keep(consoleScreen(unit)) }));
+    const screenMat = keep(new MeshBasicMaterial({ map: keep(consoleScreen(unit, tone)) }));
     const screen = new Mesh(new PlaneGeometry(0.42, 0.14), screenMat);
     screen.position.set(0, -0.84, -0.68);
     screen.rotation.x = -0.75;

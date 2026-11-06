@@ -6,7 +6,14 @@ background (CSS background SVGs cannot load web fonts).
 
     python3 scripts/gen-backdrop.py          # uses EVA_FONT_SRC or /tmp/evafonts
 
-Outputs src/client/backdrop-right.svg and src/client/backdrop-left.svg.
+Outputs, in src/client/:
+    backdrop-left.svg          shared by every unit (no unit-specific text)
+    backdrop-right-<id>.svg    one per unit (watermark kanji, number, plate)
+    mark-<id>.svg              one per unit (title-bar mark)
+
+All art is drawn in the Unit-02 TEMPLATE colours (see TEMPLATE_COLORS in
+src/shared/units.js) and recoloured per unit at runtime by `recolor()`, so
+every unit uses the same hex values here; only the text differs.
 """
 import math
 import os
@@ -32,6 +39,15 @@ RED = "#d8262e"
 ORANGE = "#f06a22"
 WARM = "#e8e2d7"
 GREEN = "#3fe08a"
+MARK_TEXT = "#fff3e6"
+
+# Per-unit text, mirroring id / kanjiNumber / designation in src/shared/units.js.
+# 弐 and 初 have near-identical ink boxes in Noto Serif CJK Black, so the
+# watermark uses one size for both.
+UNITS = {
+    "02": {"kanji": "弐", "designation": "PRODUCTION MODEL"},
+    "01": {"kanji": "初", "designation": "TEST TYPE"},
+}
 
 
 def fmt(v):
@@ -84,12 +100,13 @@ def hexagon(cx, cy, r):
     return "M" + "L".join(f"{fmt(px)} {fmt(py)}" for px, py in pts) + "Z"
 
 
-def right_svg():
+def right_svg(unit_id):
+    unit = UNITS[unit_id]
     W, H = 560, 1000
     out = []
-    # giant 弐 glyph, bleeding off the right edge
-    out.append(path(text_path("mincho", "弐", 560, 760, 620, sx=1.05, sy=0.82, anchor="end"), fill=RED, opacity=".085"))
-    out.append(path(text_path("cond", "02", 548, 905, 150, sx=1, anchor="end"), fill="none", stroke=ORANGE, stroke_width="1.2", opacity=".18"))
+    # giant unit kanji (弐 / 初), bleeding off the right edge
+    out.append(path(text_path("mincho", unit["kanji"], 560, 760, 620, sx=1.05, sy=0.82, anchor="end"), fill=RED, opacity=".085"))
+    out.append(path(text_path("cond", unit_id, 548, 905, 150, sx=1, anchor="end"), fill="none", stroke=ORANGE, stroke_width="1.2", opacity=".18"))
 
     # hex grid cluster (top right), fading leftwards
     r = 22
@@ -124,8 +141,8 @@ def right_svg():
 
     # label plate
     out.append(path("M300 268H478V312H306L300 306Z", fill="none", stroke=RED, stroke_width="1.2", opacity=".42"))
-    out.append(path(text_path("cond", "EVANGELION PRODUCTION MODEL", 308, 284, 11, spacing=1.2), fill=ORANGE, opacity=".55"))
-    out.append(path(text_path("cond", "UNIT-02", 308, 306, 20, spacing=2), fill=RED, opacity=".6"))
+    out.append(path(text_path("cond", f"EVANGELION {unit['designation']}", 308, 284, 11, spacing=1.2), fill=ORANGE, opacity=".55"))
+    out.append(path(text_path("cond", f"UNIT-{unit_id}", 308, 306, 20, spacing=2), fill=RED, opacity=".6"))
     out.append(path(text_path("cond", "LIVE", 474, 306, 11, spacing=1.5, anchor="end"), fill=GREEN, opacity=".7"))
 
     # corner brackets
@@ -166,20 +183,23 @@ def left_svg():
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}">\n{body}\n</svg>\n'
 
 
-def mark_svg():
+def mark_svg(unit_id):
     out = [
         path("M6 4h36l2 2v26L28 44H6l-2-2V6z", fill=RED),
         path("M8 8h32v22.5L26.5 40H8z", fill="none", stroke=ORANGE, stroke_width="1.2", opacity=".55"),
         path("M4 34h8M36 4v6", stroke=ORANGE, stroke_width="2"),
         path("M13 10h4v1.8h-4zM18.6 10h4v1.8h-4zM25.4 10h4v1.8h-4zM31 10h4v1.8h-4z", fill=GREEN),
-        path(text_path("cond", "02", 24, 29.5, 21, spacing=-0.5, anchor="middle"), fill="#fff3e6"),
+        path(text_path("cond", unit_id, 24, 29.5, 21, spacing=-0.5, anchor="middle"), fill=MARK_TEXT),
     ]
     return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">' + "".join(out) + "</svg>\n"
 
 
 def main():
     dest = ROOT / "src" / "client"
-    for name, svg in (("backdrop-right.svg", right_svg()), ("backdrop-left.svg", left_svg()), ("mark.svg", mark_svg())):
+    outputs = [("backdrop-left.svg", left_svg())]
+    for unit_id in UNITS:
+        outputs += [(f"backdrop-right-{unit_id}.svg", right_svg(unit_id)), (f"mark-{unit_id}.svg", mark_svg(unit_id))]
+    for name, svg in outputs:
         (dest / name).write_text(svg)
         print(f"{name}: {len(svg) / 1024:.1f} KiB")
 

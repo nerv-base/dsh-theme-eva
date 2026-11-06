@@ -2,7 +2,7 @@
 // lives in the lazily loaded chunk lib/client.cinema.js.
 /* global __dshRequire */
 import React from "react";
-import { DEFAULT_UNIT } from "../shared/units.js";
+import { getUnit } from "../shared/units.js";
 import { runtime, useStore } from "./store.js";
 import { prefersReducedMotion } from "./components.jsx";
 
@@ -18,7 +18,7 @@ function loadCinema() {
 }
 
 /** Reduced-motion stand-in: a still title card that fades out after ~2 s. */
-function StaticCard({ onDone }) {
+function StaticCard({ unit: u, onDone }) {
   const [leaving, setLeaving] = React.useState(false);
   React.useEffect(() => {
     const a = setTimeout(() => setLeaving(true), 1500);
@@ -28,7 +28,6 @@ function StaticCard({ onDone }) {
       clearTimeout(b);
     };
   }, [onDone]);
-  const u = DEFAULT_UNIT;
   return (
     <div className={`eva-static${leaving ? " is-leaving" : ""}`} onClick={onDone} role="presentation">
       <div className="eva-static-card">
@@ -39,7 +38,7 @@ function StaticCard({ onDone }) {
   );
 }
 
-function Cinematic({ t, voice, onDone }) {
+function Cinematic({ t, unit, voice, onDone }) {
   const host = React.useRef(null);
   const [failed, setFailed] = React.useState(false);
   React.useEffect(() => {
@@ -49,7 +48,7 @@ function Cinematic({ t, voice, onDone }) {
       .then((mod) => {
         if (disposed || !host.current) return;
         instance = mod.mount(host.current, {
-          unit: DEFAULT_UNIT,
+          unit,
           voice,
           voiceClips: () => __dshRequire.async("./client.voice.js").then((m) => m.clips),
           strings: {
@@ -70,7 +69,7 @@ function Cinematic({ t, voice, onDone }) {
       instance?.dispose();
     };
   }, []);
-  if (failed) return <StaticCard onDone={onDone} />;
+  if (failed) return <StaticCard unit={unit} onDone={onDone} />;
   return (
     <div className="eva-cinema-host" ref={host}>
       <div className="eva-cinema-boot">{t("cinema.loading")}</div>
@@ -112,7 +111,9 @@ export function makeCinemaOverlay(prefs) {
 
     const done = React.useCallback(() => setSession(null), []);
     if (!session) return null;
-    if (prefersReducedMotion()) return <StaticCard key={session.id} onDone={done} />;
-    return <Cinematic key={session.id} t={t} voice={prefsState.voice} onDone={done} />;
+    // The unit is fixed for one play; switching units mid-play takes effect on the next one.
+    const unit = getUnit(prefsState.unit);
+    if (prefersReducedMotion()) return <StaticCard key={session.id} unit={unit} onDone={done} />;
+    return <Cinematic key={session.id} t={t} unit={unit} voice={prefsState.voice} onDone={done} />;
   };
 }

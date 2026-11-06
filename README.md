@@ -1,14 +1,19 @@
 # dsh-theme-eva
 
-An EVA Unit-02 theme for DeepSeek Harness (DSH).
+EVA themes for DeepSeek Harness (DSH): **Unit-02 (弐号机)** and **Unit-01 (初号机)**, switchable live.
 
-- **Entry cinematic.** Every time the page opens: start gate → cel-shaded (toon + ink outline) entry plug inserted into the spine socket in hard-cut shots → an x-ray scope of the plug sinking through the lock rings → LCL floods the cabin and is electrified → hard cuts to command-room monitor screens (main power distribution, a circuit matrix opening lines 0001–1405, an anatomical nerve-connection schematic lighting up limb by limb, brain-region vital traces for the A10 link, a three-computer vote) between Mincho intertitle cards → a harmonics scope where the pilot and unit waves (hex-mesh tubes) close in as the sync ratio climbs to 99.2% and waits for the pilot to confirm → 100% → 「弐号機 起動」 title card → workbench. Everything is drawn in code (three.js + 2D canvas) and loaded only while it plays. To skip at any time, **hold Esc** (or press and hold the skip button) for about 1.2 s — a progress bar fills while you hold and drains if you let go early.
+| Unit | Armour | Markings | Sync stop |
+| --- | --- | --- | --- |
+| 02 弐号機 · PRODUCTION MODEL | red `#d8262e` | orange `#f06a22` | 99.2% |
+| 01 初号機 · TEST TYPE | purple `#8d4dde` | lime `#a0da3b` | 99.6% |
+
+- **Entry cinematic.** Every time the page opens: start gate → cel-shaded (toon + ink outline) entry plug inserted into the spine socket in hard-cut shots → an x-ray scope of the plug sinking through the lock rings → LCL floods the cabin and is electrified → hard cuts to command-room monitor screens (main power distribution, a circuit matrix opening lines 0001–1405, an anatomical nerve-connection schematic lighting up limb by limb, brain-region vital traces for the A10 link, a three-computer vote) between Mincho intertitle cards → a harmonics scope where the pilot and unit waves (hex-mesh tubes) close in as the sync ratio climbs to the unit's stop (99.2% / 99.6%) and waits for the pilot to confirm → 100% → 「弐号機 起動」 / 「初号機 起動」 title card → workbench. Everything is drawn in code (three.js + 2D canvas) and loaded only while it plays. To skip at any time, **hold Esc** (or press and hold the skip button) for about 1.2 s — a progress bar fills while you hold and drains if you let go early.
 - **Sync plate.** A small plate in the session header: sync ratio = 100% − context window occupancy, taken from the session's real context pressure. Below 30% it turns orange (精神汚染), below 10% red (シンクロ率低下).
-- **Running indicator.** At the conversation tail, an 「内部電源」 clock and faint orange line replace the native “Deep diving / 深度求索中” visuals. The clock reads the current open turn's real start timestamp, so switching sessions or mounting mid-turn does not restart it. Turning off the theme or running indicator restores the native display; its static screen-reader announcement is preserved. There is no duplicate indicator above the composer.
-- **Backdrop.** Original monitor-style graphics behind the conversation: a faint 弐 watermark, hex grid, vertical captions, phase list and caution stripes (drawn from the OFL fonts as outlines; no third-party artwork).
-- **Everyday skin.** Kept restrained so chat and code stay readable: Unit-02 palette, square corners, a red gradient at the top of the sidebar, a "02" unit mark, and Mincho titles. Messages and code blocks keep DSH's own fonts.
+- **Running indicator.** At the conversation tail, an 「内部電源」 clock and faint signal line in the unit's marking colour replace the native “Deep diving / 深度求索中” visuals. The clock reads the current open turn's real start timestamp, so switching sessions or mounting mid-turn does not restart it. Turning off the theme or running indicator restores the native display; its static screen-reader announcement is preserved. There is no duplicate indicator above the composer.
+- **Backdrop.** Original monitor-style graphics behind the conversation: a faint 弐 / 初 watermark, hex grid, vertical captions, phase list and caution stripes (drawn from the OFL fonts as outlines; no third-party artwork).
+- **Everyday skin.** Kept restrained so chat and code stay readable: the unit palette, chamfered corners, an armour-coloured gradient at the top of the sidebar, a "02" / "01" unit mark, and Mincho titles. Messages and code blocks keep DSH's own fonts.
 
-Settings live in **Settings → General → EVA 接入 / EVA Link**: theme, cinematic, voice and sound, running indicator and sync plate can each be turned off, and there is a **Replay** button. The sidebar footer has a **重新接入 / Re-link** button too.
+Settings live in **Settings → General → EVA 接入 / EVA Link**: theme, **unit (搭乘机体: 初号机 / 弐号机)**, cinematic, voice and sound, running indicator and sync plate can each be turned off, and there is a **Replay** button. The sidebar footer has a **重新接入 / Re-link** button too.
 
 While the theme is on, the appearance is locked to dark (EVA has no light mode). Turning it off restores your own light/dark/system setting.
 
@@ -46,13 +51,29 @@ Then, from a DSH session, ask the agent to install the bundle at the absolute pa
 | Command | What it does |
 | --- | --- |
 | `npm run build` | Bundle `src/` into `lib/client.js` (main) and `lib/client.cinema.js` (lazy cinematic chunk). `-- --dev` skips minification, `-- --watch` rebuilds on change. |
-| `npm test` | Run the native-status adapter and mounted React lifecycle regression tests. |
+| `npm test` | Run the unit-data, native-status adapter and mounted React lifecycle regression tests. |
 | `npm run fonts` | Re-subset the fonts from the full OTF/TTF sources (`EVA_FONT_SRC`, default `/tmp/evafonts`) to the characters used in `src/`. Run after changing any Japanese copy. |
 | `npm run voice` | Render missing announcer clips with edge-tts; `-- --force` re-renders all. Needs `python3 -m pip install --user edge-tts`. |
 
 `scripts/harness/cinema.html` runs the cinematic on its own: serve the repository root with any static server and open `/scripts/harness/cinema.html`.
 
-Unit-specific values (palette, number, pilot callsign, every cinematic line and its spoken reading) live in `src/shared/units.js`. Only Unit-02 ships today; another unit is one more entry there.
+Unit-specific values (palette roles, surfaces, colour ramps, code tokens, number, pilot callsign, every cinematic line and its spoken reading) live in `src/shared/units.js`. Units share one data shape (`tests/units.test.mjs` checks it); art is drawn once in template colours and recoloured per unit, and voice clips common to all units are `assets/voice/shared-*.mp3`. Adding a unit = one entry in `UNITS`, its `backdrop-right-NN.svg` / `mark-NN.svg` (`scripts/gen-backdrop.py`), its confirm/title clips (`npm run voice`), and the id in the `unit` union of `lib/index.js`.
+
+`scripts/harness/cinema.html?unit=01` previews another unit's cinematic.
+
+### Switching units
+
+The selected unit is the durable `unit` field (`"01"` | `"02"`, default `"02"`) of the `theme-eva` settings section, so the settings UI, `configForms.get("theme-eva").set("unit", "01")` or a settings-document edit all switch it. While the page is open the plugin also publishes a handle:
+
+```js
+globalThis.dshThemeEva.units            // [{ id: "02", themeId: "eva-02", label, palette, … }, { id: "01", … }]
+globalThis.dshThemeEva.getUnit()        // the unit showing now, or undefined while the theme is off
+await globalThis.dshThemeEva.setUnit("01") // persist + switch (false if the Host refused)
+await globalThis.dshThemeEva.setEnabled(false)
+window.addEventListener("dsh-theme-eva:change", (e) => e.detail) // { unit: "01", themeId: "eva-01" } | { unit: null, … }
+```
+
+Each unit registers its own DSH theme (`eva-01` / `eva-02`); a switch activates the new theme before retracting the old one, so there is no flash of the stock palette. The skin and component styles read `--eva-accent`, `--eva-marking`, `--eva-green`, … custom properties, which other plugins can use too (`body[data-eva-theme]` holds the unit id).
 
 Layout:
 

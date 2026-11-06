@@ -2,20 +2,10 @@
 // panel, the neural-connection schematic, brain-region vital traces and the
 // tri-computer vote. All graphics are original; only the vocabulary (CRT
 // phosphor on black, PHASE lists, Mincho captions) follows the anime look.
+import { toner } from "./tone.js";
 
 const VW = 1600;
 const VH = 1000;
-
-const C = {
-  bg: "#040405",
-  green: "#5cf2a0",
-  greenDim: "#1d5a3c",
-  orange: "#ff7a1a",
-  orangeDim: "#5a2a0c",
-  red: "#e8261c",
-  white: "#f4efe6",
-  grid: "#ff7a1a18",
-};
 
 const MINCHO = '"EVA Mincho","Noto Serif CJK JP","Hiragino Mincho ProN","Yu Mincho",serif';
 const COND = '"EVA Condensed","Barlow Condensed","Arial Narrow",sans-serif';
@@ -59,6 +49,27 @@ export function scopeAt(t) {
 }
 
 export function createMonitor(canvas, unit) {
+  // Phosphor colours: the "orange" family is the unit's HUD marking (Unit-02
+  // orange, Unit-01 lime), re-hued from the Unit-02 shades; green (linked / OK),
+  // red (hold / danger), white and the black screen are semantic and shared.
+  const tone = toner(unit);
+  const C = {
+    bg: "#040405",
+    green: "#5cf2a0",
+    greenDim: "#1d5a3c",
+    orange: tone("#ff7a1a"),
+    orangeDim: unit.palette.markingDim,
+    hot: unit.palette.markingHot,
+    amber: tone("#f2a65a"), // scope captions
+    pointer: tone("#ff5a1a"),
+    well: tone("#2a1206"), // unlit segment
+    wellDeep: tone("#1a0d05"), // unlit vertebra
+    wellMagi: tone("#1a0b05"), // undecided MAGI cell
+    red: "#e8261c",
+    scope: tone("#e8261c", "accent"), // harmonics-scope frame and scales (armour hue)
+    white: "#f4efe6",
+  };
+  C.grid = `${C.orange}18`;
   const g = canvas.getContext("2d");
   let W = 1;
   let H = 1;
@@ -313,7 +324,7 @@ export function createMonitor(canvas, unit) {
   // Scope overlays (transparent; the 3D scene is underneath).
   function caption(x, y, str, size = 30) {
     fill(x, y - size + 2, 4, size + 6, C.orange);
-    text(str, x + 18, y, { size, weight: 700, color: "#f2a65a", spacing: 0.5, glow: 10 });
+    text(str, x + 18, y, { size, weight: 700, color: C.amber, spacing: 0.5, glow: 10 });
   }
 
   function paintXray(scope, u) {
@@ -322,7 +333,7 @@ export function createMonitor(canvas, unit) {
     caption(860, 900, `Status : Verifying Link-up System`, 30);
     caption(860, 944, `Plug Depth ${(3.2 + depth * 1.6).toFixed(2)} m  ·  Insertion Angle ${(depth * 90).toFixed(1)}°`, 26);
     // depth scale on the left
-    g.strokeStyle = "#f2a65a";
+    g.strokeStyle = C.amber;
     g.lineWidth = 2;
     g.beginPath();
     for (let i = 0; i <= 40; i++) {
@@ -339,7 +350,7 @@ export function createMonitor(canvas, unit) {
   }
 
   function paintHelix(scope, u, { sync = 0, confirmed = false } = {}) {
-    const red = "#e8261c";
+    const red = C.scope;
     // top tick strip
     for (let i = 0; i < 96; i++) {
       const x = 12 + i * 16.5;
@@ -374,7 +385,7 @@ export function createMonitor(canvas, unit) {
     const err = (100 - sync) / 100;
     const my = 490 - err * 300 + Math.sin(u * 3) * 6;
     box(70, my - 60, 120, 120, red, 3);
-    g.fillStyle = "#ff5a1a";
+    g.fillStyle = C.pointer;
     g.beginPath();
     g.moveTo(84, my - 12); g.lineTo(104, my); g.lineTo(84, my + 12); g.closePath();
     g.fill();
@@ -384,10 +395,10 @@ export function createMonitor(canvas, unit) {
     caption(230, 208, confirmed ? "Neurological Link-up : Synchronization Complete" : "Verifying Neurological Link-up : Calculating Synchronization Rate", 26);
     // big sync readout
     fill(1160, 140, 380, 200, "#000000c0");
-    box(1160, 140, 380, 200, "#e8261c80", 1.5);
-    text("SYNCHRONIZATION RATIO", 1520, 180, { size: 22, spacing: 4, align: "right", color: "#f2a65a" });
-    text(`${sync.toFixed(1)}%`, 1520, 280, { size: 110, weight: 700, align: "right", color: sync >= 99 ? C.green : "#ff8a3d", glow: 18 });
-    text(`HARMONICS ±${((100 - sync) * 0.12).toFixed(2)}`, 1520, 320, { size: 22, spacing: 3, align: "right", color: "#f2a65a" });
+    box(1160, 140, 380, 200, `${C.scope}80`, 1.5);
+    text("SYNCHRONIZATION RATIO", 1520, 180, { size: 22, spacing: 4, align: "right", color: C.amber });
+    text(`${sync.toFixed(1)}%`, 1520, 280, { size: 110, weight: 700, align: "right", color: sync >= 99 ? C.green : C.hot, glow: 18 });
+    text(`HARMONICS ±${((100 - sync) * 0.12).toFixed(2)}`, 1520, 320, { size: 22, spacing: 3, align: "right", color: C.amber });
   }
 
   // Anatomical nerve schematic (front view). Everything is precomputed once:
@@ -758,35 +769,35 @@ export function createMonitor(canvas, unit) {
     const F = B.frame;
     const nodes = B.nodes;
     const complete = p >= B.tEnd;
-    const wait = "#ff7a1a80";
+    const wait = `${C.orange}80`;
 
     // frame + rulers
     g.lineWidth = 1;
-    g.strokeStyle = "#ff7a1a40";
+    g.strokeStyle = `${C.orange}40`;
     g.strokeRect(F.x + 0.5, F.y + 0.5, F.w, F.h);
-    g.strokeStyle = "#ff7a1a90";
+    g.strokeStyle = `${C.orange}90`;
     g.stroke(B.ticks);
-    for (const [str, x, y, al] of B.tickText) text(str, x, y, { size: 11, color: "#ff7a1a99", align: al, weight: 500 });
+    for (const [str, x, y, al] of B.tickText) text(str, x, y, { size: 11, color: `${C.orange}99`, align: al, weight: 500 });
     brackets(F.x - 6, F.y - 6, F.w + 12, F.h + 12, 14, C.orange);
-    text("ANTERIOR · FRONT VIEW", F.x + 40, F.y + 46, { size: 12, spacing: 2, weight: 500, color: "#ff7a1ab0" });
-    text("SCALE 1:9.6", F.x + F.w - 18, F.y + 46, { size: 12, spacing: 2, weight: 500, align: "right", color: "#ff7a1ab0" });
-    text("cm", F.x + 16, F.y + F.h - 8, { size: 11, color: "#ff7a1a99", weight: 500 });
+    text("ANTERIOR · FRONT VIEW", F.x + 40, F.y + 46, { size: 12, spacing: 2, weight: 500, color: `${C.orange}b0` });
+    text("SCALE 1:9.6", F.x + F.w - 18, F.y + 46, { size: 12, spacing: 2, weight: 500, align: "right", color: `${C.orange}b0` });
+    text("cm", F.x + 16, F.y + F.h - 8, { size: 11, color: `${C.orange}99`, weight: 500 });
 
     // body: faint fill, clipped hatch, bones, contour
-    g.fillStyle = "#ff7a1a0e";
+    g.fillStyle = `${C.orange}0e`;
     g.fill(B.outline);
     g.save();
     g.clip(B.outline);
-    g.strokeStyle = "#ff7a1a16";
+    g.strokeStyle = `${C.orange}16`;
     g.stroke(B.hatch);
     g.restore();
     g.lineCap = "round";
     g.lineJoin = "round";
-    g.strokeStyle = "#ff7a1a2a";
+    g.strokeStyle = `${C.orange}2a`;
     g.lineWidth = 2;
     g.stroke(B.bones);
     const brainOn = p >= nodes[B.callouts[0].node].t;
-    g.strokeStyle = brainOn ? "#5cf2a050" : "#ff7a1a30";
+    g.strokeStyle = brainOn ? "#5cf2a050" : `${C.orange}30`;
     g.lineWidth = 1;
     g.stroke(B.brain);
     if (complete) {
@@ -798,27 +809,27 @@ export function createMonitor(canvas, unit) {
       g.stroke(B.outline);
       g.restore();
     } else {
-      g.strokeStyle = "#ff7a1a88";
+      g.strokeStyle = `${C.orange}88`;
       g.lineWidth = 1.4;
       g.stroke(B.outline);
     }
 
     // vertebrae
     const sacOn = p > 0.005;
-    g.fillStyle = sacOn ? "#12402a" : "#1a0d05";
+    g.fillStyle = sacOn ? "#12402a" : C.wellDeep;
     g.fill(B.sacrum);
     g.strokeStyle = sacOn ? C.green : wait;
     g.stroke(B.sacrum);
     for (const v of B.verts) {
       const on = p >= nodes[v.node].t;
-      g.fillStyle = on ? "#17503a" : "#1a0d05";
+      g.fillStyle = on ? "#17503a" : C.wellDeep;
       g.fill(v.path);
       g.strokeStyle = on ? C.green : wait;
       g.stroke(v.path);
     }
 
     // nerves: dim network, then the lit part of each edge
-    g.strokeStyle = "#ff7a1a48";
+    g.strokeStyle = `${C.orange}48`;
     g.lineWidth = 1;
     g.stroke(B.nerves);
     let lit = 0;
@@ -913,14 +924,14 @@ export function createMonitor(canvas, unit) {
     for (const c of B.callouts) {
       const on = p >= nodes[c.node].t;
       const col = on ? C.green : C.orange;
-      g.strokeStyle = on ? "#5cf2a0b0" : "#ff7a1a70";
+      g.strokeStyle = on ? "#5cf2a0b0" : `${C.orange}70`;
       g.lineWidth = 1;
       g.stroke(c.path);
       fill(c.ax - 2, c.ay - 2, 4, 4, col);
       const al = c.s > 0 ? "left" : "right";
       fill(c.s > 0 ? c.lx - 4 : c.lx - 4, c.ly - 4, 8, 8, col);
       text(c.title, c.lx + c.s * 10, c.ly + 5, { size: 16, color: col, align: al, spacing: 1.5 });
-      text(`${c.sub} · ${on ? "LINK" : "WAIT"}`, c.lx + c.s * 10, c.ly + 22, { size: 11, color: on ? "#5cf2a0b0" : "#ff7a1aa0", align: al, spacing: 1.2, weight: 500 });
+      text(`${c.sub} · ${on ? "LINK" : "WAIT"}`, c.lx + c.s * 10, c.ly + 22, { size: 11, color: on ? "#5cf2a0b0" : `${C.orange}a0`, align: al, spacing: 1.2, weight: 500 });
     }
 
     // scan band + target reticle
@@ -962,9 +973,9 @@ export function createMonitor(canvas, unit) {
       const col = on ? C.green : wait;
       text(`NERVE ${String(i + 1).padStart(3, "0")}`, 84, y, { size: 19, color: col, spacing: 2 });
       const segs = on ? Math.ceil(12 * clamp(k)) : 0;
-      for (let j = 0; j < 12; j++) fill(196 + j * 12, y - 15, 10, 15, j < segs ? C.green : on ? C.greenDim : "#2a1206");
+      for (let j = 0; j < 12; j++) fill(196 + j * 12, y - 15, 10, 15, j < segs ? C.green : on ? C.greenDim : C.well);
       text(on ? "接続" : "待機", 352, y, { font: MINCHO, size: 19, weight: 900, color: on ? C.green : C.orangeDim });
-      text((0.31 + rand(i + 40) * 0.6).toFixed(2), 438, y, { size: 12, color: on ? "#5cf2a0a0" : "#ff7a1a60", align: "right", weight: 500 });
+      text((0.31 + rand(i + 40) * 0.6).toFixed(2), 438, y, { size: 12, color: on ? "#5cf2a0a0" : `${C.orange}60`, align: "right", weight: 500 });
     }
 
     // right: spinal index strip
@@ -972,7 +983,7 @@ export function createMonitor(canvas, unit) {
     text("C1—S2", 1520, 146, { size: 14, spacing: 2, align: "right" });
     B.index.forEach((id, i) => {
       const on = p >= nodes[id].t;
-      fill(1250 + i * 10.4, 156, 9, 20, on ? C.green : "#2a1206");
+      fill(1250 + i * 10.4, 156, 9, 20, on ? C.green : C.well);
     });
     [["C", 0], ["T", 7], ["L", 19], ["S", 24]].forEach(([s, i]) => {
       fill(1250 + i * 10.4, 180, 1, 8, C.orange);
@@ -1079,7 +1090,7 @@ export function createMonitor(canvas, unit) {
     nodes.forEach(([name, x, y], i) => {
       const on = u > 0.12 + i * 0.14;
       hexagon(x, y, 140);
-      g.fillStyle = on ? "#0f3a26" : "#1a0b05";
+      g.fillStyle = on ? "#0f3a26" : C.wellMagi;
       g.fill();
       g.strokeStyle = on ? C.green : C.orange;
       g.lineWidth = 3;

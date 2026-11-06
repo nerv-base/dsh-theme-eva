@@ -1,10 +1,11 @@
 // Boot cinematic chunk: start gate → entry-plug insertion → LCL → neural link →
-// sync climb to 99.2% → pilot confirmation → 100% → title card → workbench.
+// sync climb to the unit's stop ratio → pilot confirmation → 100% → title card → workbench.
 import hudCss from "./hud.css";
 import { AudioEngine, Announcer, VoicePlayer } from "./audio.js";
 import { voiceFile, voiceLines } from "../shared/units.js";
 import { createScene, T } from "./scene.js";
 import { createMonitor, CUTS, SCOPES, cutAt } from "./monitor.js";
+import { toner } from "./tone.js";
 
 const FINAL_AT = T.syncStop; // timeline resumes here after confirmation
 const TITLE_AT = FINAL_AT + 2.2;
@@ -30,15 +31,34 @@ function fmtClock(t) {
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}:${String(c).padStart(2, "0")}`;
 }
 
-function syncAt(t, confirmedAt) {
+// Sync ratio: climbs to the unit's stop value, holds for confirmation, then 100%.
+function syncAt(t, confirmedAt, stop) {
   if (t < T.syncStart) return 0;
   if (confirmedAt == null || t < FINAL_AT) {
     const x = clamp((t - T.syncStart) / (T.syncStop - T.syncStart));
     const eased = 1 - Math.pow(1 - x, 2.4);
     const jitter = x < 1 ? Math.sin(t * 37) * 0.6 * (1 - x) : 0;
-    return clamp(eased * 99.2 + jitter, 0, 99.2);
+    return clamp(eased * stop + jitter, 0, stop);
   }
-  return 99.2 + 0.8 * clamp((t - FINAL_AT) / 0.9);
+  return stop + (100 - stop) * clamp((t - FINAL_AT) / 0.9);
+}
+
+// HUD colour variables (hud.css) from the unit palette; shades that are not a
+// palette role are re-hued from their Unit-02 values (see tone.js).
+function hudVars(unit) {
+  const p = unit.palette;
+  const tone = toner(unit);
+  return {
+    "--evc-accent": p.marking,
+    "--evc-hot": p.markingHot,
+    "--evc-red": p.armor,
+    "--evc-crimson": p.accent,
+    "--evc-text": p.hudText,
+    "--evc-well": tone("#1a0d0b", "accent"),
+    "--evc-panel": tone("#1b0d0b", "accent"),
+    "--evc-rim": tone("#ffb88f", "marking"),
+    "--evc-red-hot": tone("#d34634", "accent"),
+  };
 }
 
 export function mount(container, { unit, voice = true, voiceClips, strings = {}, onDone }) {
@@ -48,6 +68,8 @@ export function mount(container, { unit, voice = true, voiceClips, strings = {},
   document.head.appendChild(style);
 
   const root = el("div", "evc-root");
+  for (const [k, v] of Object.entries(hudVars(unit))) root.style.setProperty(k, v);
+  const pal = unit.palette;
   root.setAttribute("role", "dialog");
   root.setAttribute("aria-label", unit.title.en);
   const canvas = el("canvas", "evc-canvas");
@@ -110,7 +132,7 @@ export function mount(container, { unit, voice = true, voiceClips, strings = {},
     `<div class="evc-sync-head"><span>SYNCHRONIZATION RATIO</span><span data-k="harm">HARMONICS ±0.0</span></div>
      <div class="evc-sync-num"><span data-k="sync">0.0</span><small>%</small></div>
      <canvas width="880" height="184"></canvas>
-     <div class="evc-sync-legend"><span><i style="background:#f06a22"></i>PILOT</span><span><i style="background:#e8e2d7"></i>UNIT-${esc(unit.id)}</span><span><i style="background:#58c46a"></i>HARMONICS</span></div>`,
+     <div class="evc-sync-legend"><span><i style="background:var(--evc-accent)"></i>PILOT</span><span><i style="background:var(--evc-text)"></i>UNIT-${esc(unit.id)}</span><span><i style="background:#58c46a"></i>HARMONICS</span></div>`,
   );
   hud.appendChild(sync);
   root.appendChild(hud);
@@ -288,8 +310,8 @@ export function mount(container, { unit, voice = true, voiceClips, strings = {},
       }
       wctx.stroke();
     };
-    line("#e8e2d7", t * 2.1, 0.9, 3, 2);
-    line("#f06a22", t * 2.1 + diff * 2.6, 0.9 - diff * 0.4, 3 + diff * 1.4, 2.4);
+    line(pal.hudText, t * 2.1, 0.9, 3, 2);
+    line(pal.marking, t * 2.1 + diff * 2.6, 0.9 - diff * 0.4, 3 + diff * 1.4, 2.4);
     line("#58c46a", t * 3 + 1, 0.15 + diff * 0.5, 7, 1.4);
   }
 
@@ -324,7 +346,7 @@ export function mount(container, { unit, voice = true, voiceClips, strings = {},
 
     // Scene
     const titleOn = confirmedAt != null && t >= TITLE_AT;
-    const s = syncAt(t, confirmedAt);
+    const s = syncAt(t, confirmedAt, unit.syncStop);
     const clock = now / 1000;
     if (scene && !titleOn) {
       const fade = confirmedAt != null ? 1 - clamp((t - (TITLE_AT - 0.4)) / 0.4) : 1;

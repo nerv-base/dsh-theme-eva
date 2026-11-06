@@ -1,10 +1,13 @@
 // Brand marks, settings row, sidebar replay action, sync meter, overlays.
 import React from "react";
-import { DEFAULT_UNIT } from "../shared/units.js";
+import { UNITS, UNIT_IDS, getUnit } from "../shared/units.js";
 import { runtime, useStore, requestPlay } from "./store.js";
 import { attachRunningStatus, turnStartTime } from "./running-status.js";
 
-const unit = DEFAULT_UNIT;
+/** The unit the preferences currently select (re-renders on switch). */
+export function useUnit(prefs) {
+  return getUnit(useStore(prefs.store, (s) => s.unit));
+}
 
 export function prefersReducedMotion() {
   return typeof matchMedia === "function" && matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -18,8 +21,9 @@ function fmt(t, key, vars) {
 
 /* ───────────── brand ───────────── */
 
-/** Own Unit-02 mark: a pentagon-cut red plate with the unit number. No third-party logos. */
-export function UnitMark({ size = 24, number = unit.id, title }) {
+/** Own unit mark: a pentagon-cut armour plate with the unit number. No third-party logos. */
+export function UnitMark({ unit, size = 24, number = unit.id, title }) {
+  const p = unit.palette;
   return (
     <svg
       className="eva-mark"
@@ -30,10 +34,10 @@ export function UnitMark({ size = 24, number = unit.id, title }) {
       aria-hidden={title ? undefined : "true"}
       aria-label={title}
     >
-      <path d="M6 4h36l2 2v26L28 44H6l-2-2V6z" fill="#d8262e" />
-      <path d="M8 8h32v22.5L26.5 40H8z" fill="none" stroke="#ff8a3d" strokeWidth="1.2" opacity=".55" />
-      <path d="M4 34h8M36 4v6" stroke="#f06a22" strokeWidth="2" />
-      <path d="M13 10h4v1.8h-4zM18.6 10h4v1.8h-4zM25.4 10h4v1.8h-4zM31 10h4v1.8h-4z" fill="#3fe08a" />
+      <path d="M6 4h36l2 2v26L28 44H6l-2-2V6z" fill={p.accent} />
+      <path d="M8 8h32v22.5L26.5 40H8z" fill="none" stroke={p.markingHot} strokeWidth="1.2" opacity=".55" />
+      <path d="M4 34h8M36 4v6" stroke={p.marking} strokeWidth="2" />
+      <path d="M13 10h4v1.8h-4zM18.6 10h4v1.8h-4zM25.4 10h4v1.8h-4zM31 10h4v1.8h-4z" fill={p.green} />
       <text
         x="24"
         y="29.5"
@@ -42,7 +46,7 @@ export function UnitMark({ size = 24, number = unit.id, title }) {
         fontWeight="700"
         fontSize="21"
         letterSpacing="-0.5"
-        fill="#fff3e6"
+        fill={p.markText}
       >
         {number}
       </text>
@@ -50,20 +54,26 @@ export function UnitMark({ size = 24, number = unit.id, title }) {
   );
 }
 
-export function BrandMark({ size }) {
-  return <UnitMark size={size ?? 24} />;
+export function makeBrandMark(prefs) {
+  return function BrandMark({ size }) {
+    const unit = useUnit(prefs);
+    return <UnitMark unit={unit} size={size ?? 24} />;
+  };
 }
 
-export function BrandName() {
-  return (
-    <span className="eva-brand-name">
-      <span className="eva-brand-kanji">{unit.kanji}</span>
-      <span className="eva-brand-sub">UNIT-{unit.id} · DSH</span>
-    </span>
-  );
+export function makeBrandName(prefs) {
+  return function BrandName() {
+    const unit = useUnit(prefs);
+    return (
+      <span className="eva-brand-name">
+        <span className="eva-brand-kanji">{unit.kanji}</span>
+        <span className="eva-brand-sub">UNIT-{unit.id} · DSH</span>
+      </span>
+    );
+  };
 }
 
-export function HeroMark() {
+export function HeroMark({ unit }) {
   return (
     <div className="eva-hero" aria-hidden="true">
       <div className="eva-hero-rule">
@@ -104,14 +114,47 @@ function Switch({ checked, onChange, label, disabled }) {
 
 const TOGGLES = ["enabled", "cinematic", "voice", "scanBeam", "syncMeter"];
 
+/** Unit selector: one armour-plate card per registered unit (radio group). */
+function UnitPicker({ value, onChange, disabled, t }) {
+  return (
+    <div className="eva-unit-picker" role="radiogroup" aria-label={t("settings.unit")}>
+      {UNIT_IDS.map((id) => {
+        const u = UNITS[id];
+        const on = id === value;
+        return (
+          <button
+            key={id}
+            type="button"
+            role="radio"
+            aria-checked={on}
+            disabled={disabled}
+            className={`eva-unit-option${on ? " is-on" : ""}`}
+            style={{ "--eva-opt-accent": u.palette.accent, "--eva-opt-marking": u.palette.marking }}
+            onClick={() => !on && onChange(id)}
+          >
+            <UnitMark unit={u} size={30} />
+            <span className="eva-unit-option-text">
+              <span className="eva-unit-option-name">{t(`unit.${id}`)}</span>
+              <span className="eva-unit-option-sub">
+                {u.designation} · {u.pilotRole}
+              </span>
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function makeSettingsRow(prefs) {
   return function EvaSettingsRow({ t }) {
     const state = useStore(prefs.store);
+    const unit = getUnit(state.unit);
     const reduced = prefersReducedMotion();
     return (
       <div className="eva-settings">
         <div className="eva-settings-head">
-          <UnitMark size={28} />
+          <UnitMark unit={unit} size={28} />
           <div className="eva-settings-text">
             <div className="eva-settings-title">{t("settings.title")}</div>
             <div className="eva-settings-desc">{t("settings.desc")}</div>
@@ -126,6 +169,18 @@ export function makeSettingsRow(prefs) {
           </button>
         </div>
         <div className="eva-settings-list">
+          <div className={`eva-settings-item eva-settings-item-unit${!state.enabled ? " is-dim" : ""}`}>
+            <div className="eva-settings-text">
+              <div className="eva-settings-label">{t("settings.unit")}</div>
+              <div className="eva-settings-desc">{t("settings.unit.desc")}</div>
+            </div>
+            <UnitPicker
+              value={unit.id}
+              disabled={!state.enabled}
+              t={t}
+              onChange={(id) => prefs.set("unit", id)}
+            />
+          </div>
           {TOGGLES.map((key) => (
             <div key={key} className={`eva-settings-item${key !== "enabled" && !state.enabled ? " is-dim" : ""}`}>
               <div className="eva-settings-text">

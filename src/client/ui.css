@@ -5,15 +5,15 @@
 /* ── brand ── */
 .eva-brand-name{display:inline-flex;align-items:baseline;gap:8px;min-width:0;white-space:nowrap;color:var(--dsw-alias-label-primary)}
 .eva-brand-kanji{font-family:var(--eva-font-mincho,"EVA Mincho",serif);font-weight:900;font-size:18px;line-height:1;letter-spacing:.02em;transform:scaleY(.86);transform-origin:50% 70%;display:inline-block}
-.eva-brand-sub{font-family:var(--eva-font-condensed,"EVA Condensed",sans-serif);font-weight:600;font-size:11px;letter-spacing:.14em;color:var(--eva-orange,#f06a22)}
+.eva-brand-sub{font-family:var(--eva-font-condensed,"EVA Condensed",sans-serif);font-weight:600;font-size:11px;letter-spacing:.14em;color:var(--eva-marking,#f06a22)}
 
 .eva-hero{display:flex;flex-direction:column;align-items:center;gap:6px;user-select:none;color:var(--eva-text,#ece4da);margin-bottom:6px}
 .eva-hero-title{display:flex;align-items:flex-end;gap:10px;line-height:.82}
-.eva-hero-kanji{font-family:"EVA Mincho",var(--eva-font-mincho),serif;font-weight:900;font-size:58px;letter-spacing:-.01em;transform:scale(1.04,.82);transform-origin:50% 100%;display:inline-block;text-shadow:0 0 22px #d8262e40}
-.eva-hero-num{font-family:"EVA Condensed",var(--eva-font-condensed),sans-serif;font-weight:700;font-size:44px;color:var(--eva-orange,#f06a22);line-height:.8;text-shadow:0 0 18px #f06a2255}
+.eva-hero-kanji{font-family:"EVA Mincho",var(--eva-font-mincho),serif;font-weight:900;font-size:58px;letter-spacing:-.01em;transform:scale(1.04,.82);transform-origin:50% 100%;display:inline-block;text-shadow:0 0 22px color-mix(in srgb,var(--eva-accent,#d8262e) 25%,transparent)}
+.eva-hero-num{font-family:"EVA Condensed",var(--eva-font-condensed),sans-serif;font-weight:700;font-size:44px;color:var(--eva-marking,#f06a22);line-height:.8;text-shadow:0 0 18px color-mix(in srgb,var(--eva-marking,#f06a22) 33%,transparent)}
 .eva-hero-rule{display:flex;align-items:center;gap:10px;width:min(340px,80vw);font-family:"EVA Condensed",var(--eva-font-condensed),sans-serif;font-weight:600;font-size:11px;letter-spacing:.22em;color:var(--dsw-alias-label-tertiary,#a59a93)}
-.eva-hero-rule i{flex:1;height:1px;background:linear-gradient(90deg,#d8262e,#d8262e 40%,#f06a2200)}
-.eva-hero-rule-bottom i{background:linear-gradient(90deg,#f06a2200,#f06a22 60%,#f06a22)}
+.eva-hero-rule i{flex:1;height:1px;background:linear-gradient(90deg,var(--eva-accent,#d8262e),var(--eva-accent,#d8262e) 40%,color-mix(in srgb,var(--eva-marking,#f06a22) 0%,transparent))}
+.eva-hero-rule-bottom i{background:linear-gradient(90deg,color-mix(in srgb,var(--eva-marking,#f06a22) 0%,transparent),var(--eva-marking,#f06a22) 60%,var(--eva-marking,#f06a22))}
 
 /* ── settings row ── */
 .eva-settings{border-bottom:.5px solid var(--dsw-alias-border-l2);padding:16px 0;display:flex;flex-direction:column;gap:10px}
@@ -40,11 +40,11 @@
 .eva-foot-btn:hover{background:var(--dsw-alias-interactive-bg-hover);color:var(--eva-accent,#d8262e)}
 
 /* ── sync plate (session header utilities) ── */
-.eva-sync{--eva-sync:#f06a22;display:inline-flex;align-items:center;gap:7px;height:24px;padding:0 8px 0 0;box-sizing:border-box;border:1px solid color-mix(in srgb,var(--eva-sync) 55%,transparent);font-family:"EVA Condensed",var(--eva-font-condensed),sans-serif;font-variant-numeric:tabular-nums;color:var(--dsw-alias-label-secondary);user-select:none;white-space:nowrap;clip-path:polygon(0 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%)}
-.eva-sync.is-ok .eva-sync-bar i.on{background:#3fe08a;box-shadow:0 0 4px #3fe08a88}
-.eva-sync.is-ok .eva-sync-value{color:#3fe08a;text-shadow:0 0 8px #3fe08a66}
-.eva-sync.is-warn{--eva-sync:#f0b53a}
-.eva-sync.is-critical{--eva-sync:#f0413c}
+.eva-sync{--eva-sync:var(--eva-marking,#f06a22);display:inline-flex;align-items:center;gap:7px;height:24px;padding:0 8px 0 0;box-sizing:border-box;border:1px solid color-mix(in srgb,var(--eva-sync) 55%,transparent);font-family:"EVA Condensed",var(--eva-font-condensed),sans-serif;font-variant-numeric:tabular-nums;color:var(--dsw-alias-label-secondary);user-select:none;white-space:nowrap;clip-path:polygon(0 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%)}
+.eva-sync.is-ok .eva-sync-bar i.on{background:var(--eva-green,#3fe08a);box-shadow:0 0 4px color-mix(in srgb,var(--eva-green,#3fe08a) 53%,transparent)}
+.eva-sync.is-ok .eva-sync-value{color:var(--eva-green,#3fe08a);text-shadow:0 0 8px color-mix(in srgb,var(--eva-green,#3fe08a) 40%,transparent)}
+.eva-sync.is-warn{--eva-sync:var(--eva-warn,#f0b53a)}
+.eva-sync.is-critical{--eva-sync:var(--eva-red-hot,#f0413c)}
 .eva-sync.is-unknown{--eva-sync:#6f6462}
 .eva-sync-tag{align-self:stretch;display:flex;align-items:center;padding:0 6px;background:var(--eva-sync);color:#0b0b0c;font-weight:700;font-size:10.5px;letter-spacing:.16em}
 .eva-sync-bar{display:flex;gap:2px}
@@ -58,13 +58,13 @@
 
 /* ── native running status: replace its visuals, never its React-owned state ── */
 [data-chat-running][data-eva-running]>:not([data-eva-running-status]):not([role="status"]){display:none!important}
-[data-chat-running][data-eva-running]{color:#f0413c}
-.eva-running-power{display:flex;align-items:center;gap:10px;width:100%;min-width:0;min-height:28px;pointer-events:none;color:#f0413c}
-.eva-running-power b{flex:none;color:var(--eva-orange,#f06a22);font-family:"EVA Mincho",var(--eva-font-mincho),serif;font-weight:900;font-size:12px;letter-spacing:.12em;white-space:nowrap}
-.eva-running-power b::before{content:"";display:inline-block;width:6px;height:6px;margin-right:7px;vertical-align:1px;border-radius:50%;background:#3fe08a;box-shadow:0 0 8px #3fe08a;animation:eva-breathe 1.4s ease-in-out infinite}
+[data-chat-running][data-eva-running]{color:var(--eva-red-hot,#f0413c)}
+.eva-running-power{display:flex;align-items:center;gap:10px;width:100%;min-width:0;min-height:28px;pointer-events:none;color:var(--eva-red-hot,#f0413c)}
+.eva-running-power b{flex:none;color:var(--eva-marking,#f06a22);font-family:"EVA Mincho",var(--eva-font-mincho),serif;font-weight:900;font-size:12px;letter-spacing:.12em;white-space:nowrap}
+.eva-running-power b::before{content:"";display:inline-block;width:6px;height:6px;margin-right:7px;vertical-align:1px;border-radius:50%;background:var(--eva-green,#3fe08a);box-shadow:0 0 8px var(--eva-green,#3fe08a);animation:eva-breathe 1.4s ease-in-out infinite}
 .eva-power-clock{flex:none;font-family:"EVA Condensed",var(--eva-font-condensed),sans-serif;font-variant-numeric:tabular-nums;font-weight:600;font-size:16px;letter-spacing:.06em;white-space:nowrap}
 .eva-power-clock small{font-size:11px;opacity:.75}
-.eva-power-line{flex:1;height:1px;max-width:220px;min-width:12px;background:linear-gradient(90deg,#f06a22,#f06a2288 50%,#f06a2200);opacity:.35;animation:eva-breathe 2.8s ease-in-out infinite}
+.eva-power-line{flex:1;height:1px;max-width:220px;min-width:12px;background:linear-gradient(90deg,var(--eva-marking,#f06a22),color-mix(in srgb,var(--eva-marking,#f06a22) 53%,transparent) 50%,color-mix(in srgb,var(--eva-marking,#f06a22) 0%,transparent));opacity:.35;animation:eva-breathe 2.8s ease-in-out infinite}
 @keyframes eva-breathe{0%,100%{opacity:.18}50%{opacity:.75}}
 @media (prefers-reduced-motion:reduce){.eva-power-line,.eva-running-power b::before{animation:none;opacity:.5}}
 @media (forced-colors:active){[data-chat-running][data-eva-running],.eva-running-power{color:CanvasText}.eva-power-line{background:CanvasText;animation:none;opacity:1}}
@@ -76,4 +76,17 @@
 .eva-static.is-leaving{opacity:0}
 .eva-static-card{text-align:center;color:#e8e2d7}
 .eva-static-kanji{font-family:"EVA Mincho",var(--eva-font-mincho),serif;font-weight:900;font-size:clamp(56px,11vw,140px);line-height:1;transform:scale(1.05,.78);letter-spacing:.02em}
-.eva-static-en{margin-top:14px;font-family:"EVA Condensed",var(--eva-font-condensed),sans-serif;font-weight:600;letter-spacing:.32em;font-size:13px;color:var(--eva-orange,#f06a22)}
+.eva-static-en{margin-top:14px;font-family:"EVA Condensed",var(--eva-font-condensed),sans-serif;font-weight:600;letter-spacing:.32em;font-size:13px;color:var(--eva-marking,#f06a22)}
+
+/* unit picker (settings) */
+.eva-settings-item-unit{flex-wrap:wrap;row-gap:10px}
+.eva-unit-picker{display:flex;gap:8px;flex-wrap:wrap}
+.eva-unit-option{--eva-opt-accent:var(--eva-accent,#d8262e);--eva-opt-marking:var(--eva-marking,#f06a22);display:flex;align-items:center;gap:9px;min-width:150px;padding:6px 12px 6px 7px;border:1px solid var(--dsw-alias-border-l2);border-radius:var(--dsw-radius-md,6px);background:var(--dsw-alias-bg-layer-2,transparent);color:var(--dsw-alias-label-secondary);cursor:pointer;text-align:left;font:inherit;transition:border-color .15s ease,background .15s ease,box-shadow .15s ease}
+.eva-unit-option:hover:not(:disabled){border-color:color-mix(in srgb,var(--eva-opt-accent) 60%,transparent)}
+.eva-unit-option.is-on{color:var(--dsw-alias-label-primary);border-color:var(--eva-opt-marking);background:linear-gradient(90deg,color-mix(in srgb,var(--eva-opt-accent) 22%,transparent),transparent 80%);box-shadow:inset 2px 0 0 var(--eva-opt-marking)}
+.eva-unit-option:disabled{cursor:default;opacity:.55}
+.eva-unit-option:focus-visible{outline:2px solid var(--eva-opt-marking);outline-offset:2px}
+.eva-unit-option-text{display:flex;flex-direction:column;gap:2px;min-width:0}
+.eva-unit-option-name{font-family:"EVA Mincho",var(--eva-font-mincho),serif;font-weight:900;font-size:14px;letter-spacing:.04em}
+.eva-unit-option-sub{font-family:"EVA Condensed",var(--eva-font-condensed),sans-serif;font-weight:600;font-size:9.5px;letter-spacing:.14em;color:var(--dsw-alias-label-tertiary);white-space:nowrap}
+.eva-unit-option.is-on .eva-unit-option-sub{color:var(--eva-opt-marking)}

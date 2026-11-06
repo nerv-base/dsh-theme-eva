@@ -16,7 +16,9 @@ copyright notices, as the OFL requires.
 
 ## Announcer voice
 
-The ten clips in `assets/voice/` are original system-announcement lines (no
+The fourteen clips in `assets/voice/` (ten entry-sequence lines shared by
+every unit, `shared-*.mp3`, plus a boarding-confirm and title line per unit,
+`01-*.mp3` / `02-*.mp3`) are original system-announcement lines (no
 dialogue from the anime, no imitation of any voice actor) spoken by the
 generic Microsoft `ja-JP-NanamiNeural` voice. They were generated once through
 the Microsoft online speech service via the open-source `edge-tts` client and
@@ -35,4 +37,5 @@ lines with a voice you hold rights to: edit the `voice` strings in
 
 No audio recordings from the anime, music, character artwork, or NERV /
 studio logos are included. Sound effects are synthesized at runtime with
-WebAudio; the "02" unit mark is an original drawing.
+WebAudio; the "01" / "02" unit marks and backdrop graphics are original
+drawings.

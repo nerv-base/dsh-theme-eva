@@ -4,8 +4,8 @@ import { installTheme } from "./theme.js";
 import { LOCALE_NS, zh, en } from "./locale.js";
 import uiCss from "./ui.css";
 import {
-  BrandMark,
-  BrandName,
+  makeBrandMark,
+  makeBrandName,
   makeSettingsRow,
   makeFooterReplay,
   makeSyncMeter,
@@ -33,7 +33,17 @@ export function apply(ctx) {
   }, "dsh-theme-eva: component styles");
 
   const prefs = createPrefs(ctx);
-  installTheme(ctx, prefs);
+  const themeSwitch = installTheme(ctx, prefs);
+
+  // Public switch: `globalThis.dshThemeEva.setUnit("01")` from other plugins or
+  // the console. The durable source of truth is the `unit` field of the
+  // `theme-eva` settings section, so writing it through configForms works too.
+  ctx.effect(() => {
+    globalThis.dshThemeEva = themeSwitch;
+    return () => {
+      if (globalThis.dshThemeEva === themeSwitch) delete globalThis.dshThemeEva;
+    };
+  }, "dsh-theme-eva: public switch");
 
   // Always-present controls.
   ctx.slots.inject("settings.general.item", () =>
@@ -68,6 +78,8 @@ export function apply(ctx) {
   });
 
   // Brand seats shadow the shipped UI, so they are only occupied while the theme is on.
+  const BrandMark = makeBrandMark(prefs);
+  const BrandName = makeBrandName(prefs);
   const brandSeats = [
     ["sidebar.brand.mark", BrandMark],
     ["sidebar.brand.name", BrandName],

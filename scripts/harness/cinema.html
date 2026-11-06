@@ -36,8 +36,9 @@ window.__ModuleLoader__ = {
 };
 </script>
 <script type="module">
-import { DEFAULT_UNIT } from "/src/shared/units.js";
-window.__evaUnit = DEFAULT_UNIT;
+import { getUnit } from "/src/shared/units.js";
+// ?unit=01 | ?unit=02 (default: the shipped default unit)
+window.__evaUnit = getUnit(new URLSearchParams(location.search).get("unit"));
 await document.fonts.load('900 40px "EVA Mincho"');
 const s = document.createElement("script");
 s.src = "/lib/client.cinema.js";
