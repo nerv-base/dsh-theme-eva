@@ -1,0 +1,105 @@
+# Release: pushing a tag vX.Y.Z publishes dsh-theme-eva@X.Y.Z to npm and
+# creates the matching GitHub Release (notes generated from the commits since
+# the previous tag, packed tarball attached).
+#
+# npm auth uses Trusted Publishing (OIDC) — no token is stored in the repo.
+# The package must trust this workflow once:
+#   npm trust github dsh-theme-eva --repo nerv-base/dsh-theme-eva --file release.yml
+# If an NPM_TOKEN repository secret exists it is used instead.
+#
+# Cut a release locally with:
+#   npm version patch        # bumps package.json, rebuilds lib/, commits, tags vX.Y.Z
+#   git push --follow-tags
+
+name: Release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Existing tag to (re)release, e.g. v0.1.3"
+        required: true
+
+permissions:
+  contents: write # create the GitHub Release
+  id-token: write # npm Trusted Publishing + provenance
+
+concurrency:
+  group: release-${{ github.event.inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      TAG: ${{ github.event.inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ env.TAG }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+          cache: npm
+
+      # Trusted Publishing needs npm >= 11.5.1; Node 22 ships npm 10.
+      - name: Upgrade npm
+        run: npm install -g npm@^11.5.1
+
+      - name: Check tag matches package.json
+        run: |
+          version="$(node -p 'require("./package.json").version')"
+          if [ "v$version" != "$TAG" ]; then
+            echo "::error::Tag $TAG does not match package.json version $version"
+            exit 1
+          fi
+          echo "VERSION=$version" >> "$GITHUB_ENV"
+
+      - run: npm ci
+      - run: npm test
+
+      # lib/ is committed; rebuild from source and make sure the tagged commit
+      # actually contains what the sources produce.
+      - name: Build and verify lib/ is up to date
+        run: |
+          npm run build
+          if ! git diff --quiet -- lib; then
+            git --no-pager diff --stat -- lib
+            echo "::error::lib/ is stale — run 'npm run build' and commit before tagging."
+            exit 1
+          fi
+
+      - name: Pack
+        run: |
+          npm pack
+          echo "TARBALL=dsh-theme-eva-$VERSION.tgz" >> "$GITHUB_ENV"
+
+      - name: Publish to npm
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if npm view "dsh-theme-eva@$VERSION" version >/dev/null 2>&1; then
+            echo "dsh-theme-eva@$VERSION is already on npm — skipping publish."
+            exit 0
+          fi
+          # With no NPM_TOKEN secret, drop the empty token so npm uses OIDC.
+          if [ -z "$NODE_AUTH_TOKEN" ]; then unset NODE_AUTH_TOKEN; fi
+          npm publish "$TARBALL" --access public --provenance
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            gh release upload "$TAG" "$TARBALL" --clobber
+          else
+            gh release create "$TAG" "$TARBALL" \
+              --title "$TAG" \
+              --generate-notes \
+              --verify-tag
+          fi
