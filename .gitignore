@@ -4,3 +4,4 @@ output/
 .playwright-cli/
 *.tgz
 scripts/harness/skin.html
+scripts/harness/question.html

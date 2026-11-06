@@ -280,7 +280,11 @@ ${B} [data-phase]:has(> [data-slot="conversation.header"])::before{
     radial-gradient(120% 70% at 100% 0, #d8262e0d, transparent 60%),
     radial-gradient(80% 50% at 0 100%, #f06a2208, transparent 60%);
 }
-${B} [data-phase]:has(> [data-slot="conversation.header"]) > [data-slot="conversation.header"] > *{position:relative;z-index:1}
+/* Positioned (so it paints above the backdrop and anchors the hairline) but
+   deliberately WITHOUT z-index: a stacking context here would trap fixed
+   overlays that header plugins render inline (e.g. a subagent drawer at
+   z-index 1000) beneath the composer and side docks. */
+${B} [data-phase]:has(> [data-slot="conversation.header"]) > [data-slot="conversation.header"] > *{position:relative}
 ${B} [data-phase]:has(> [data-slot="conversation.header"]) > [data-slot="conversation.header"] > *::after{
   content:"";position:absolute;left:0;right:0;bottom:0;height:1px;pointer-events:none;
   background:linear-gradient(90deg,#d8262e 0,#d8262e66 22%,transparent 48%,transparent 62%,#f06a2255 85%,#f06a22 100%);opacity:.55}
@@ -334,6 +338,44 @@ ${B} *,${B} *::before,${B} *::after{corner-shape:bevel !important}
 ${B} :is(img,video,canvas,picture,[class*="vatar"],[class*="vatar"] *){corner-shape:round !important}
 ${B} :is(button,[role="button"],[role="switch"],[role="tab"],[role="menuitem"],[role="option"],kbd,input,select){border-radius:5px !important}
 ${B} :is(textarea,[contenteditable="true"]){border-radius:0 !important}
+
+/* ── new-session hero: the launch order instead of "Into the Unknown" ──
+   The stock headline span keeps its text for screen readers (font-size 0);
+   the copy is drawn as a squashed Mincho line with a HUD subtitle. */
+${B} ${tok("titleGroup")} > span:first-child:not(${tok("previewBadge")}){
+  font-size:0 !important;display:inline-flex;flex-direction:column;align-items:center;gap:3px;line-height:1}
+${B} ${tok("titleGroup")} > span:first-child:not(${tok("previewBadge")})::before{
+  content:"${unit.hero.ja}";font:900 31px/36px "EVA Mincho",serif;letter-spacing:.04em;color:var(--dsw-alias-label-primary);
+  display:inline-block;transform:scaleX(.84);text-shadow:0 0 18px #d8262e40}
+${B} ${tok("titleGroup")} > span:first-child:not(${tok("previewBadge")})::after{
+  content:"${unit.hero.en}";font:600 10.5px/14px "EVA Condensed",sans-serif;letter-spacing:.32em;color:var(--eva-orange);
+  padding:2px 0 0 .32em;border-top:1px solid #d8262e88;text-shadow:0 0 8px #f06a2255}
+${B} ${tok("previewBadge")}{
+  background:#f06a2214 !important;color:var(--eva-orange) !important;border:none !important;border-radius:2px !important;
+  box-shadow:inset 0 0 0 1px #f06a2266;font-family:"EVA Condensed",var(--ds-font-family-code) !important;letter-spacing:.12em}
+
+/* ── ask-user question: recommended option = MAGI unanimous (3/3 可決) ──
+   The stock badge paints info-fill text on the nav-accent fill; both are
+   orange here, so the badge is replaced outright. The original "推荐" text
+   stays in the DOM (font-size 0) for screen readers. */
+${B} ${tok("optionLine")} ${tok("badge")}{
+  display:inline-flex;align-items:center;gap:6px;height:18px;padding:0 7px 0 5px;
+  font-size:0 !important;line-height:18px;color:transparent !important;
+  background:#1b1618 !important;border-radius:2px !important;
+  box-shadow:inset 0 0 0 1px #3a2a2c, inset 2px 0 0 var(--eva-orange);
+  align-self:center;white-space:nowrap}
+${B} ${tok("optionLine")} ${tok("badge")}::before{
+  content:"MAGI";padding-left:32px;
+  font:600 10.5px/18px "EVA Condensed",sans-serif;letter-spacing:.16em;color:#bdb1a8;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='10' viewBox='0 0 26 10'%3E%3Cg fill='%233fe08a'%3E%3Cpath d='M2 0h4l2 5-2 5H2L0 5z'/%3E%3Cpath d='M11 0h4l2 5-2 5h-4l-2-5z'/%3E%3Cpath d='M20 0h4l2 5-2 5h-4l-2-5z'/%3E%3C/g%3E%3C/svg%3E") left center / 26px 10px no-repeat;
+  filter:drop-shadow(0 0 3px #3fe08a88)}
+${B} ${tok("optionLine")} ${tok("badge")}::after{
+  content:"可決";font:900 11.5px/18px "EVA Mincho",serif;color:var(--eva-orange-hot,#ff8a3d);
+  display:inline-block;transform:scaleX(.88);transform-origin:left center;margin-right:-1px}
+${B} ${tok("option")}:has(${tok("badge")}){
+  border-color:#f06a2255 !important;box-shadow:inset 2px 0 0 var(--eva-orange)}
+${B} ${tok("option")}:has(${tok("badge")}) ${tok("number")}{
+  background:var(--eva-orange) !important;color:#140a06 !important}
 
 /* ── hard-coded tints in shipped panels ── */
 ${B} [class*="_root_1alm6_"]{--json-tree-property:#ff9a52;--json-tree-string:#7fdca4;--json-tree-number:#f5c96a;--json-tree-keyword:#ff5a52;--json-tree-punctuation:#bdb1a8;--json-tree-icon:#8b7f7a}

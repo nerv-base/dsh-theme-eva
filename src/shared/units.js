@@ -56,6 +56,8 @@ export const UNITS = {
     final: { id: "final", ja: "シンクロ率 100%、ハーモニクス正常", en: "SYNC RATIO 100% — HARMONICS NORMAL", voice: "シンクロ率、百パーセント。" },
     title: { id: "title", ja: "弐号機 起動", en: "EVANGELION UNIT-02 · ACTIVATED", voice: "エヴァンゲリオン二号機、起動。" },
     gate: { ja: "接続待機", en: "ENTRY PLUG — STANDBY" },
+    // New-session hero headline (replaces the stock "探索未至之境 / Into the Unknown").
+    hero: { ja: "弐号機、発進", en: "EVANGELION UNIT-02 · LAUNCH" },
     syncStop: 99.2,
     // Pre-rendered announcer clips: assets/voice/<unit id>-<line id>.mp3 (see scripts/gen-voice.mjs).
     voiceName: "ja-JP-NanamiNeural",
