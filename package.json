@@ -1,6 +1,6 @@
 {
   "name": "dsh-theme-eva",
-  "version": "0.1.3",
+  "version": "0.2.0",
   "description": "EVA Unit-01 / Unit-02 themes for DeepSeek Harness, switchable live: entry-plug boot cinematic, LCL, sync-rate meter and a restrained everyday skin.",
   "type": "module",
   "main": "lib/index.js",
