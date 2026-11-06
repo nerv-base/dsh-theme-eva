@@ -15,6 +15,9 @@ import { makeCinemaOverlay } from "./cinemaHost.jsx";
 
 export const inject = ["slots", "locale", "theme", "configForms"];
 
+// Lower than every shipped brand occupant: official brand 0, liveshare viewer -10.
+export const BRAND_PRIORITY = -100;
+
 export function apply(ctx) {
   ctx.effect(() => ctx.locale.register(LOCALE_NS, { zh, en }), "dsh-theme-eva: dictionaries");
 
@@ -78,6 +81,14 @@ export function apply(ctx) {
   });
 
   // Brand seats shadow the shipped UI, so they are only occupied while the theme is on.
+  //
+  // These are `single` slots and a registration only shadows an existing occupant when it
+  // sits at a *strictly lower* priority — an equal priority is a hard error
+  // (`single slot "sidebar.brand.mark" already has a registration at priority 0`).
+  // The shipped `@deepseek-ai/dsh-client-ui-brand-official` occupies the sidebar seats at
+  // priority 0 in official builds, and the experimental liveshare viewer brand at -10, so
+  // the theme registers below both. Registering at the default 0 breaks the moment the
+  // official brand is present.
   const BrandMark = makeBrandMark(prefs);
   const BrandName = makeBrandName(prefs);
   const brandSeats = [
@@ -88,9 +99,18 @@ export function apply(ctx) {
   for (const [name, Component] of brandSeats) {
     ctx.slots.inject(name, () => {
       let dispose;
+      const register = () => {
+        try {
+          return ctx.slots.register({ name, priority: BRAND_PRIORITY, registrant: "dsh-theme-eva" }, Component);
+        } catch (error) {
+          // Losing this seat costs the themed brand only; it must not take the rest of the theme down.
+          console.warn(`[dsh-theme-eva] brand seat "${name}" not occupied`, error);
+          return undefined;
+        }
+      };
       const sync = () => {
         const on = prefs.get().enabled;
-        if (on && !dispose) dispose = ctx.slots.register({ name }, Component);
+        if (on && !dispose) dispose = register();
         else if (!on && dispose) {
           dispose();
           dispose = undefined;
