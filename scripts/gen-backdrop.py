@@ -15,6 +15,7 @@ All art is drawn in the Unit-02 TEMPLATE colours (see TEMPLATE_COLORS in
 src/shared/units.js) and recoloured per unit at runtime by `recolor()`, so
 every unit uses the same hex values here; only the text differs.
 """
+import json
 import math
 import os
 import sys
@@ -23,6 +24,7 @@ from pathlib import Path
 from fontTools.pens.svgPathPen import SVGPathPen
 from fontTools.pens.transformPen import TransformPen
 from fontTools.ttLib import TTFont
+
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = Path(os.environ.get("EVA_FONT_SRC", "/tmp/evafonts"))
@@ -100,13 +102,64 @@ def hexagon(cx, cy, r):
     return "M" + "L".join(f"{fmt(px)} {fmt(py)}" for px, py in pts) + "Z"
 
 
+# Figure placement on the 560×1000 right panel. The traced art (see
+# scripts/trace-mech.py) is in source-image pixels; it is scaled so the unit
+# stands on GROUND with its head near FIG_TOP, centred on FIG_X.
+FIG_X, FIG_TOP, GROUND = 268, 150, 938
+MECH = {uid: json.loads((ROOT / "scripts" / "mech" / f"unit-{uid}.json").read_text()) for uid in ("01", "02")}
+
+# line layer → (colour, opacity); line art only, no colour fields
+MECH_LAYERS = [
+    ("fine", RED, ".26"),
+    ("edge", ORANGE, ".42"),
+    ("accent", GREEN, ".5"),
+    ("ink", RED, ".62"),
+]
+
+
+def fig_box(unit_id):
+    x0, y0, x1, y1 = MECH[unit_id]["bbox"]
+    s = (GROUND - FIG_TOP) / (y1 - y0)
+    return FIG_X - (x0 + x1) / 2 * s, GROUND - y1 * s, s
+
+
+def fig_pt(unit_id, x, y):
+    """Source-image pixel → panel px."""
+    ox, oy, s = fig_box(unit_id)
+    return ox + x * s, oy + y * s
+
+
+def figure_svg(unit_id):
+    """The unit as a design sheet: traced line art (see scripts/trace-mech.py)."""
+    mech = MECH[unit_id]
+    ox, oy, s = fig_box(unit_id)
+    out = [f'<g transform="translate({fmt(ox)} {fmt(oy)}) scale({s:.4f})">']
+    tx, ty, sx, sy = mech["layers"]["ink"]["transform"]
+    out.append(f'<g transform="translate({fmt(tx)} {fmt(ty)}) scale({sx:g} {sy:g})">')
+    for name, fill, op in MECH_LAYERS:
+        out.append(f'<path d="{mech["layers"][name]["d"]}" fill="{fill}" opacity="{op}"/>')
+    out.append("</g></g>")
+    return out
+
+
+def callout(unit_id, label, num, lx, ly, fx, fy):
+    """Leader from a figure point (source-image px) to a label on the left."""
+    tx, ty = fig_pt(unit_id, fx, fy)
+    elbow = lx + 96
+    out = [
+        path(f"M{fmt(lx)} {fmt(ly + 4)}H{fmt(elbow)}L{fmt(tx)} {fmt(ty)}", fill="none", stroke=ORANGE, stroke_width=".8", opacity=".3"),
+        path(f"M{fmt(tx - 2)} {fmt(ty - 2)}h4v4h-4z", fill=ORANGE, opacity=".4"),
+        path(text_path("cond", f"{num:02d}", lx, ly, 10, spacing=1), fill=GREEN, opacity=".5"),
+        path(text_path("cond", label, lx + 18, ly, 10, spacing=1.2), fill=ORANGE, opacity=".42"),
+    ]
+    return out
+
+
 def right_svg(unit_id):
     unit = UNITS[unit_id]
     W, H = 560, 1000
     out = []
-    # giant unit kanji (弐 / 初), bleeding off the right edge
-    out.append(path(text_path("mincho", unit["kanji"], 560, 760, 620, sx=1.05, sy=0.82, anchor="end"), fill=RED, opacity=".085"))
-    out.append(path(text_path("cond", unit_id, 548, 905, 150, sx=1, anchor="end"), fill="none", stroke=ORANGE, stroke_width="1.2", opacity=".18"))
+    out.append(path(text_path("cond", unit_id, 548, 905, 150, sx=1, anchor="end"), fill="none", stroke=ORANGE, stroke_width="1.2", opacity=".16"))
 
     # hex grid cluster (top right), fading leftwards
     r = 22
@@ -115,35 +168,59 @@ def right_svg(unit_id):
         for col in range(8):
             cx = W - 20 - col * r * 1.5
             cy = 40 + row * r * math.sqrt(3) + (r * math.sqrt(3) / 2 if col % 2 else 0)
-            fade = max(0.0, 1 - col / 7.5) * max(0.0, 1 - row / 9.5)
+            fade = max(0.0, 1 - col / 6.5) * max(0.0, 1 - row / 9.5)
             if fade < 0.08:
                 continue
             hexes.append((cx, cy, fade))
     for cx, cy, fade in hexes:
-        out.append(path(hexagon(cx, cy, r - 2), fill="none", stroke=ORANGE, stroke_width="1", opacity=fmt(0.16 * fade)))
-    # a few lit cells
+        out.append(path(hexagon(cx, cy, r - 2), fill="none", stroke=ORANGE, stroke_width="1", opacity=fmt(0.13 * fade)))
     for i in (3, 9, 10, 17):
         if i < len(hexes):
             cx, cy, fade = hexes[i]
-            out.append(path(hexagon(cx, cy, r - 5), fill=GREEN, opacity=fmt(0.13 * fade + 0.04)))
+            out.append(path(hexagon(cx, cy, r - 5), fill=GREEN, opacity=fmt(0.11 * fade + 0.03)))
+
+    # design-sheet frame: centre line, ground line, height dimension
+    dash = "".join(f"M{FIG_X} {y}V{y + 18}M{FIG_X} {y + 24}V{y + 26}" for y in range(22, int(GROUND) + 20, 32))
+    out.append(path(dash, fill="none", stroke=ORANGE, stroke_width=".8", opacity=".16"))
+    out.append(path(f"M88 {fmt(GROUND)}H452", fill="none", stroke=ORANGE, stroke_width="1", opacity=".28"))
+    hatch = "".join(f"M{x} {fmt(GROUND)}l-8 8" for x in range(100, 452, 10))
+    out.append(path(hatch, fill="none", stroke=ORANGE, stroke_width=".8", opacity=".14"))
+
+    # unit figure
+    out += figure_svg(unit_id)
+
+    # callouts (left of the figure), targets in source-image px
+    out += callout(unit_id, "HEAD UNIT", 1, 20, 226, 520, 150)
+    out += callout(unit_id, "SHOULDER PYLON", 2, 20, 318, 385, 240)
+    out += callout(unit_id, "ARMOR · FOREARM", 3, 20, 520, 340, 520)
+    out += callout(unit_id, "KNEE GUARD", 4, 20, 700, 415, 860)
 
     # vertical caption columns along the right edge
     out.append(path(text_path("mincho", "汎用人型決戦兵器", 530, 330, 15, sy=0.92, spacing=3, vertical=True), fill=WARM, opacity=".26"))
     out.append(path(text_path("mincho", "人造人間エヴァンゲリオン", 506, 330, 15, sy=0.92, spacing=3, vertical=True), fill=RED, opacity=".3"))
 
-    # tick ruler
-    ticks = [f"M486 320V{H - 120}"]
-    for i, ty in enumerate(range(320, H - 119, 12)):
-        ticks.append(f"M{486 - (10 if i % 5 == 0 else 5)} {ty}H486")
+    # height ruler, top of the figure to the ground
+    top = FIG_TOP
+    unit_h = (GROUND - FIG_TOP) / 10
+    step = unit_h / 5
+    ticks = [f"M486 {fmt(top)}V{fmt(GROUND)}"]
+    for i in range(51):
+        ty = top + i * step
+        ticks.append(f"M{486 - (10 if i % 5 == 0 else 5)} {fmt(ty)}H486")
     out.append(path("".join(ticks), fill="none", stroke=ORANGE, stroke_width="1", opacity=".2"))
-    for i, ty in enumerate(range(320, H - 119, 60)):
-        out.append(path(text_path("cond", f"{i * 5:02d}", 470, ty + 4, 10, anchor="end"), fill=ORANGE, opacity=".26"))
+    for i in range(0, 11):
+        ty = GROUND - i * unit_h
+        out.append(path(text_path("cond", f"{i * 10:02d}", 470, ty + 4, 10, anchor="end"), fill=ORANGE, opacity=".26"))
 
-    # label plate
-    out.append(path("M300 268H478V312H306L300 306Z", fill="none", stroke=RED, stroke_width="1.2", opacity=".42"))
-    out.append(path(text_path("cond", f"EVANGELION {unit['designation']}", 308, 284, 11, spacing=1.2), fill=ORANGE, opacity=".55"))
-    out.append(path(text_path("cond", f"UNIT-{unit_id}", 308, 306, 20, spacing=2), fill=RED, opacity=".6"))
-    out.append(path(text_path("cond", "LIVE", 474, 306, 11, spacing=1.5, anchor="end"), fill=GREEN, opacity=".7"))
+    # label plate + unit kanji seal (top left)
+    out.append(path("M20 40H198V84H26L20 78Z", fill="none", stroke=RED, stroke_width="1.2", opacity=".42"))
+    out.append(path(text_path("cond", f"EVANGELION {unit['designation']}", 28, 56, 11, spacing=1.2), fill=ORANGE, opacity=".55"))
+    out.append(path(text_path("cond", f"UNIT-{unit_id}", 28, 78, 20, spacing=2), fill=RED, opacity=".6"))
+    out.append(path(text_path("cond", "LIVE", 194, 78, 11, spacing=1.5, anchor="end"), fill=GREEN, opacity=".7"))
+    out.append(path("M20 96H92V168H20Z", fill="none", stroke=RED, stroke_width="1.2", opacity=".3"))
+    out.append(path(text_path("mincho", unit["kanji"], 56, 155, 64, sy=0.9, anchor="middle"), fill=RED, opacity=".22"))
+    out.append(path(text_path("cond", "GENERAL ARRANGEMENT", 102, 108, 10, spacing=1.4), fill=WARM, opacity=".26"))
+    out.append(path(text_path("cond", "FRONT VIEW  ·  1 : 800", 102, 124, 10, spacing=1.4), fill=WARM, opacity=".2"))
 
     # corner brackets
     br = "M552 14V2H520M552 986V998H520"
@@ -153,9 +230,9 @@ def right_svg(unit_id):
     stripes = []
     for i in range(10):
         x0 = 330 + i * 16
-        stripes.append(f"M{x0} 958L{x0 + 8} 958L{x0 + 18} 944L{x0 + 10} 944Z")
+        stripes.append(f"M{x0} 976L{x0 + 8} 976L{x0 + 18} 962L{x0 + 10} 962Z")
     out.append(f'<g opacity=".22">{path("".join(stripes), fill=RED)}</g>')
-    out.append(path(text_path("cond", "CAUTION  ·  L.C.L. PRESSURE", 330, 976, 10, spacing=1.6), fill=ORANGE, opacity=".35"))
+    out.append(path(text_path("cond", "CAUTION  ·  L.C.L. PRESSURE", 330, 992, 10, spacing=1.6), fill=ORANGE, opacity=".35"))
 
     body = "\n".join(out)
     return f'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}">\n{body}\n</svg>\n'
