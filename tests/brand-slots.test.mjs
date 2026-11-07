@@ -153,6 +153,8 @@ function fakeCtx(slots, initial) {
       return disposer;
     },
     locale: { register: () => () => {} },
+    // Optional services (model selection) are absent here; cordis would never run the callback.
+    inject: () => {},
     on: () => () => {},
     configForms: { get: () => undefined },
     theme: {

@@ -12,6 +12,7 @@ import {
   makeRunningIndicator,
 } from "./components.jsx";
 import { makeCinemaOverlay } from "./cinemaHost.jsx";
+import { makeEffortSync } from "./effort-sync.jsx";
 
 export const inject = ["slots", "locale", "theme", "configForms"];
 
@@ -73,6 +74,35 @@ export function apply(ctx) {
       makeRunningIndicator(prefs),
     ),
   );
+  // Reasoning effort as a sync-ratio slider, just before the model seat. It rides the
+  // shipped model-selection service; without it (or for addressed subagent sessions,
+  // where model selection is unavailable) the slider simply is not offered.
+  ctx.inject(["slots", "modelDirectories", "sessions"], (scope) => {
+    const models = scope.modelDirectories;
+    const sessions = scope.sessions;
+    scope.slots.inject("conversation.input.right", () =>
+      scope.slots.register(
+        {
+          name: "conversation.input.right",
+          id: "theme-eva-effort-sync",
+          order: 1000,
+          locale: LOCALE_NS,
+          inject: (sessionId) => {
+            const available = sessions.subagentAddress?.(sessionId) === undefined;
+            if (!available) return { available };
+            const directory = models.directoryFor(sessionId);
+            return {
+              available,
+              directory: directory.store,
+              load: () => directory.load().catch(() => {}),
+              select: (selection) => directory.select(selection),
+            };
+          },
+        },
+        makeEffortSync(prefs),
+      ),
+    );
+  });
   ctx.slots.inject("shell.overlay", function* () {
     yield ctx.slots.register(
       { name: "shell.overlay", id: "theme-eva-cinema", order: 1000, locale: LOCALE_NS },

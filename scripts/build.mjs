@@ -15,7 +15,7 @@ const common = {
   format: "cjs",
   platform: "browser",
   target: ["chrome120", "safari17"],
-  external: ["react"],
+  external: ["react", "react-dom"], // both supplied by the host module loader
   jsx: "transform",
   jsxFactory: "React.createElement",
   jsxFragment: "React.Fragment",

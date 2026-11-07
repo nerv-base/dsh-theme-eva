@@ -12,6 +12,7 @@ export const DEFAULTS = Object.freeze({
   voice: true,
   scanBeam: true,
   syncMeter: true,
+  effortSync: true,
 });
 const HINT_KEY = "dsh-theme-eva:prefs-hint";
 

@@ -56,6 +56,101 @@
 @keyframes eva-blink{0%{opacity:1}50%{opacity:.25}}
 @container (max-width:520px){.eva-sync-bar,.eva-sync-alert{display:none}}
 
+/* ── effort sync slider (composer, before the model seat) ── */
+.eva-effort{--eva-effort:var(--eva-green,#3fe08a);--eva-effort-cell:12px;position:relative;display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 8px 0 0;box-sizing:border-box;border:1px solid color-mix(in srgb,var(--eva-effort) 45%,transparent);font-family:"EVA Condensed",var(--eva-font-condensed),sans-serif;font-variant-numeric:tabular-nums;color:var(--dsw-alias-label-secondary);user-select:none;white-space:nowrap;clip-path:polygon(0 0,100% 0,100% calc(100% - 6px),calc(100% - 6px) 100%,0 100%);transition:border-color .18s ease}
+.eva-effort.is-auto{--eva-effort:#8a7f7b}
+.eva-effort.is-full{--eva-effort:var(--eva-marking,#f06a22)}
+.eva-effort.is-berserk{--eva-effort:var(--eva-red-hot,#f0413c)}
+.eva-effort.is-failed{--eva-effort:var(--eva-warn,#f0b53a)}
+.eva-effort-tag{align-self:stretch;display:flex;align-items:center;padding:0 5px;background:var(--eva-effort);color:#0b0b0c;font-weight:700;font-size:10px;letter-spacing:.16em;transition:background .18s ease}
+.eva-effort-track{position:relative;display:flex;align-items:center;height:100%;overflow:hidden}
+.eva-effort-cells{display:flex;pointer-events:none}
+.eva-effort-cells i{display:flex;justify-content:center;width:var(--eva-effort-cell)}
+.eva-effort-cells i::before{content:"";width:5px;height:12px;background:#ffffff17;transform:skewX(-20deg);transition:background .14s ease,box-shadow .14s ease}
+.eva-effort-cells i.on::before{background:var(--eva-effort);box-shadow:0 0 5px color-mix(in srgb,var(--eva-effort) 55%,transparent)}
+.eva-effort-cells i.berserk::before{height:14px;width:6px;outline:1px solid color-mix(in srgb,var(--eva-red-hot,#f0413c) 40%,transparent)}
+.eva-effort-cells i.auto::before{height:6px}
+.eva-effort-range{position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;opacity:0;cursor:ew-resize;-webkit-appearance:none;appearance:none;background:transparent}
+.eva-effort-range::-webkit-slider-thumb{-webkit-appearance:none;width:var(--eva-effort-cell);height:24px}
+.eva-effort-range::-moz-range-thumb{width:var(--eva-effort-cell);height:24px;border:none}
+.eva-effort:has(.eva-effort-range:focus-visible){outline:2px solid var(--eva-effort);outline-offset:2px}
+.eva-effort:hover{border-color:var(--eva-effort)}
+.eva-effort-value{font-weight:700;font-size:14px;line-height:1;color:var(--eva-effort);min-width:36px;text-align:right;text-shadow:0 0 8px color-mix(in srgb,var(--eva-effort) 35%,transparent)}
+.eva-effort-value>span{display:inline-block;min-width:5ch;text-align:right}
+.eva-effort-value small{font-size:9.5px;margin-left:1px;opacity:.8}
+.eva-effort-name{font-weight:600;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--dsw-alias-label-tertiary);max-width:64px;overflow:hidden;text-overflow:ellipsis}
+.eva-effort.is-berserk .eva-effort-name{font-family:"EVA Mincho",var(--eva-font-mincho),serif;font-weight:900;font-size:12px;letter-spacing:.06em;color:var(--eva-effort);animation:eva-blink 1.1s steps(2,jump-none) infinite}
+.eva-effort::after{content:"";position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 10px color-mix(in srgb,var(--eva-red-hot,#f0413c) 45%,transparent);opacity:0}
+.eva-effort.is-berserk::after{animation:eva-berserk 1.6s ease-in-out infinite}
+.eva-effort.is-busy .eva-effort-value{opacity:.6}
+@keyframes eva-berserk{0%,100%{opacity:0}50%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.eva-effort.is-berserk::after,.eva-effort.is-berserk .eva-effort-name{animation:none}}
+@media (max-width:640px){.eva-effort-name{display:none}}
+/* The slider carries the effort; drop the duplicate caption from the model trigger. */
+[class*="_standardControls"]:has(.eva-effort) [class*="_triggerEffort"]{display:none}
+/* Live link: lit cells pulse in sequence and a sheen streams along the track. */
+.eva-effort-track::after{content:"";position:absolute;top:3px;bottom:3px;left:0;width:45%;pointer-events:none;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--eva-effort) 34%,transparent),transparent);transform:translateX(-100%);animation:eva-effort-sheen 2.4s linear infinite;will-change:transform}
+.eva-effort-cells i.on::before{animation:eva-effort-flow 1.5s ease-in-out infinite;animation-delay:calc(var(--i,0) * 120ms)}
+.eva-effort.is-busy .eva-effort-track::after{animation-duration:.8s}
+.eva-effort.is-berserk .eva-effort-track::after{animation-duration:1.1s}
+@keyframes eva-effort-sheen{from{transform:translateX(-100%)}to{transform:translateX(230%)}}
+@keyframes eva-effort-flow{0%,60%,100%{opacity:.72}25%{opacity:1}}
+
+/* ── sync panel: docked into the model seat's menu in place of its reasoning row ── */
+/* The seat's reasoning row gives way to the panel. While our seat's menu opens
+   (html[data-eva-effort-menu], raised by effort-sync.jsx) the row is first stretched to the
+   panel's box, so the seat measures and anchors the menu at its final size; the dock then
+   takes the row's place without moving anything. Keep both boxes identical. */
+html[data-eva-effort-menu] [role="menu"]>[role="menuitem"]:has([data-model-id])+[role="menuitem"],.eva-effort-dock{--eva-sp-w:316px;--eva-sp-h:264px;flex:none;box-sizing:border-box;width:var(--eva-sp-w);max-width:100%;height:var(--eva-sp-h);min-height:0;max-height:none;margin:0}
+html[data-eva-effort-menu] [role="menu"]>[role="menuitem"]:has([data-model-id])+[role="menuitem"]{visibility:hidden;padding:0;overflow:hidden}
+.eva-effort-dock{display:flex;flex-direction:column;padding:4px 9px 9px}
+.eva-effort-dock>.eva-sp{display:flex;flex-direction:column;flex:1 1 auto;min-height:0}
+.eva-effort-dock+[role="menuitem"]{display:none!important}
+.eva-sp{--eva-sp:var(--eva-green,#3fe08a);--eva-sp-ink:#f3dc6c;font-family:"EVA Condensed",var(--eva-font-condensed),sans-serif;font-variant-numeric:tabular-nums;color:var(--dsw-alias-label-secondary);user-select:none;-webkit-user-select:none}
+.eva-sp.is-auto{--eva-sp:#8a7f7b}
+.eva-sp.is-full{--eva-sp:var(--eva-marking,#f06a22)}
+.eva-sp.is-berserk{--eva-sp:var(--eva-red-hot,#f0413c)}
+.eva-sp.is-failed{--eva-sp:var(--eva-warn,#f0b53a)}
+/* the slider: a thick pill with a round thumb */
+.eva-sp-slider{position:relative;height:28px;margin:0 0 2px}
+.eva-sp-rail{position:absolute;left:0;right:0;top:50%;height:18px;transform:translateY(-50%);border-radius:9px;overflow:hidden;background:color-mix(in srgb,var(--dsw-alias-label-primary,#fff) 9%,transparent);box-shadow:inset 0 1px 3px #0007}
+.eva-sp-fill{position:absolute;left:0;top:0;bottom:0;width:calc(14px + var(--eva-pos) * (100% - 28px));overflow:hidden;border-radius:9px;background:linear-gradient(90deg,color-mix(in srgb,var(--eva-sp) 55%,#9fe3f4),#effbff);box-shadow:0 0 14px color-mix(in srgb,var(--eva-sp) 55%,transparent);transition:width .22s cubic-bezier(.2,.8,.2,1),background .2s ease}
+.eva-sp-fill::after{content:"";position:absolute;top:0;bottom:0;left:-36px;right:-36px;background:repeating-linear-gradient(90deg,transparent 0 7px,rgba(0,36,56,.07) 7px 11px);transform:skewX(-28deg);animation:eva-sp-stream .9s linear infinite}
+.eva-sp.is-berserk .eva-sp-fill::after{animation-duration:.35s}
+.eva-sp-rail i{position:absolute;top:5px;bottom:5px;width:2px;margin-left:-1px;border-radius:1px;left:calc(14px + var(--i) / (var(--eva-stops) - 1) * (100% - 28px));background:rgba(255,255,255,.2)}
+.eva-sp-rail i.on{background:rgba(0,30,50,.16)}
+.eva-sp-thumb{position:absolute;top:50%;left:calc(var(--eva-pos) * (100% - 28px));width:28px;height:28px;transform:translateY(-50%);box-sizing:border-box;border-radius:50%;background:radial-gradient(circle at 38% 32%,#fff 0 40%,#e6edf1 100%);box-shadow:0 0 0 1px #0003,0 1px 4px #0008,0 0 14px color-mix(in srgb,var(--eva-sp) 65%,transparent);pointer-events:none;transition:left .22s cubic-bezier(.2,.8,.2,1),box-shadow .2s ease}
+.eva-sp-range{position:absolute;inset:0;width:100%;height:100%;margin:0;padding:0;opacity:0;cursor:ew-resize;-webkit-appearance:none;appearance:none;background:transparent}
+.eva-sp-range::-webkit-slider-thumb{-webkit-appearance:none;width:28px;height:28px}
+.eva-sp-range::-moz-range-thumb{width:28px;height:28px;border:none}
+.eva-sp-slider:has(.eva-sp-range:focus-visible) .eva-sp-thumb{outline:2px solid var(--dsw-alias-label-primary,#fff);outline-offset:2px}
+.eva-sp-stops{position:relative;height:13px;margin:0 0 8px;font-size:9.5px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--dsw-alias-label-tertiary)}
+.eva-sp-stops span{position:absolute;top:0;left:calc(14px + var(--i) / (var(--eva-stops) - 1) * (100% - 28px));transform:translateX(-50%);white-space:nowrap;cursor:pointer;transition:color .15s ease}
+.eva-sp-stops span:first-child{left:2px;transform:none}
+.eva-sp-stops span:last-child{left:auto;right:2px;transform:none}
+.eva-sp-stops span:hover{color:var(--dsw-alias-label-primary)}
+.eva-sp-stops span.is-current{color:var(--eva-sp)}
+/* the monitor: double-ruled frame, captions in its four corners */
+.eva-sp-scope{position:relative;flex:1 1 auto;min-height:0;margin:2px;border:1px solid color-mix(in srgb,var(--eva-sp) 40%,#2a2a2e);border-radius:6px;background:#000;box-shadow:0 0 0 2px #0b0b0d,inset 0 0 26px rgba(255,60,60,.08);overflow:hidden;transition:border-color .2s ease}
+.eva-sp-scope{contain:layout paint style}
+.eva-sp-scope canvas{position:absolute;inset:0;width:100%;height:100%;display:block;will-change:transform}
+.eva-sp-head,.eva-sp-sub{contain:layout paint style;will-change:transform}
+.eva-sp-head{position:absolute;top:0;padding:3px 0 2px;left:8px;right:8px;display:flex;align-items:baseline;gap:6px;pointer-events:none;white-space:nowrap}
+.eva-sp-title{overflow:hidden;text-overflow:ellipsis;font-size:9.5px;font-weight:700;letter-spacing:.08em;color:var(--eva-sp-ink)}
+.eva-sp-mode{font-size:9.5px;font-weight:700;letter-spacing:.1em;color:#d9d2cf;opacity:.8}
+.eva-sp.is-berserk .eva-sp-mode{color:#ff5a4a;opacity:1;animation:eva-blink 1.1s steps(2,jump-none) infinite}
+.eva-sp-time{margin-left:auto;font-family:"DIN Condensed","Avenir Next Condensed","Arial Narrow",ui-sans-serif,sans-serif;font-size:13px;font-weight:500;line-height:1;letter-spacing:.06em;font-variant-numeric:tabular-nums;color:#ffe9e3;text-shadow:0 0 4px rgba(255,70,60,.8)}
+.eva-sp-sub{position:absolute;left:0;right:0;bottom:9px;padding:6px 0;display:flex;justify-content:center;align-items:baseline;gap:.35em;pointer-events:none;white-space:nowrap;font-family:"EVA Mincho",var(--eva-font-mincho),"Hiragino Mincho ProN","Songti SC",serif;font-size:15px;font-weight:700;line-height:1;color:#fff;text-shadow:-1px -1px 0 #000,1px -1px 0 #000,-1px 1px 0 #000,1px 1px 0 #000,0 0 6px #000}
+.eva-sp-value{font-variant-numeric:tabular-nums}
+.eva-sp-value>span{display:inline-block;min-width:4.2ch;text-align:right}
+.eva-sp.is-failed .eva-sp-sub{color:var(--eva-warn,#f0b53a)}
+.eva-sp.is-busy .eva-sp-value{opacity:.75}
+.eva-sp-scope::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;box-shadow:inset 0 0 30px color-mix(in srgb,var(--eva-red-hot,#f0413c) 50%,transparent);opacity:0}
+.eva-sp.is-berserk .eva-sp-scope::after{animation:eva-sp-alarm 1.2s ease-in-out infinite}
+@keyframes eva-sp-stream{to{transform:skewX(-28deg) translateX(22px)}}
+@keyframes eva-sp-alarm{0%,100%{opacity:0}50%{opacity:1}}
+@media (prefers-reduced-motion:reduce){.eva-effort-track::after,.eva-effort-cells i.on::before,.eva-sp-fill::after,.eva-sp.is-berserk .eva-sp-mode,.eva-sp.is-berserk .eva-sp-scope::after{animation:none}.eva-sp-fill,.eva-sp-thumb{transition:none}}
+
 /* ── native running status: replace its visuals, never its React-owned state ── */
 [data-chat-running][data-eva-running]>:not([data-eva-running-status]):not([role="status"]){display:none!important}
 [data-chat-running][data-eva-running]{color:var(--eva-red-hot,#f0413c)}

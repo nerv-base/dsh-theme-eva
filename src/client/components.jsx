@@ -112,7 +112,7 @@ function Switch({ checked, onChange, label, disabled }) {
   );
 }
 
-const TOGGLES = ["enabled", "cinematic", "voice", "scanBeam", "syncMeter"];
+const TOGGLES = ["enabled", "cinematic", "voice", "scanBeam", "syncMeter", "effortSync"];
 
 /** Unit selector: one armour-plate card per registered unit (radio group). */
 function UnitPicker({ value, onChange, disabled, t }) {
